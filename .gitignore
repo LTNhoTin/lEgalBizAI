@@ -1,0 +1,75 @@
+# Data Exclusions 
+data/raw
+data/processed/finetune/fine_tune_data.training_data_cleaned_af.json
+backend/model
+backend/data/faiss_index
+
+# Tool Exclusions
+data/src/generaltools/tools_checkID/old
+data/src/generaltools/tools_checkID/new/id_cof_fl_point.py
+data/src/generaltools/tools_checkID/new/id_cof_fl_article.py
+data/src/generaltools/tools_checkID/new/id_cof_clause.py
+backend/retrieval/embedding
+
+# Python Cache Files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Model and Cache Files
+*.pkl
+*.bin
+*.safetensors
+*.h5
+*.ckpt
+*.pth
+*.model
+models/
+checkpoints/
+.cache/
+logs/
+outputs/
+unsloth_compiled_cache/
+
+# System and Build Files
+.DS_Store
+**/node_modules/
+.vite
+dist
+fullstack-env
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS Files
+Thumbs.db
+.DS_Store
