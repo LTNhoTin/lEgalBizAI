@@ -36,7 +36,7 @@ models:
   # 1 GEMMA Embedding Model 
   # =====================================================
   gemma:
-    enabled: true  
+    enabled: false  
     model_name: "google/embeddinggemma-300m"
     max_seq_length: 512  # EmbeddingGemma supports up to 2K tokens, using 512 for efficiency
     embedding_dim: 768   # EmbeddingGemma default dimension (supports 768, 512, 256, 128 via Matryoshka)
