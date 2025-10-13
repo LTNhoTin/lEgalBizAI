@@ -97,9 +97,9 @@ def main():
         result = client.chat(message)
         
         if "error" in result:
-            print(f"❌ Error: {result['error']}")
+            print(f"Error: {result['error']}")
         else:
-            print(f"✅ Response: {result['response'][:200]}..." if len(result['response']) > 200 else f"✅ Response: {result['response']}")
+            print(f"Response: {result['response'][:200]}..." if len(result['response']) > 200 else f"Response: {result['response']}")
     
     print("\n🎯 Interactive Chat Mode (type 'quit' to exit):")
     while True:
@@ -115,7 +115,7 @@ def main():
             result = client.chat(user_input)
             
             if "error" in result:
-                print(f"❌ Error: {result['error']}")
+                print(f"Error: {result['error']}")
             else:
                 print(result['response'])
                 
@@ -123,7 +123,7 @@ def main():
             print("\n\n👋 Goodbye!")
             break
         except Exception as e:
-            print(f"❌ Error: {e}")
+            print(f"Error: {e}")
 
 if __name__ == "__main__":
     main()

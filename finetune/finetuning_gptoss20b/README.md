@@ -1,6 +1,6 @@
 # GPT-OSS 20B Finetuning Project
 
-🚀 Dự án finetune model GPT-OSS 20B cho Sale Marketing với cấu trúc rõ ràng và dễ quản lý.
+Dự án finetune model GPT-OSS 20B cho Sale Marketing với cấu trúc rõ ràng và dễ quản lý.
 
 ## 📁 Cấu trúc dự án
 
@@ -47,7 +47,7 @@ uv pip install git+https://github.com/huggingface/transformers
 uv pip install "git+https://github.com/triton-lang/triton.git@05b2c186c1b6c9a08375389d5efe9cb4c401c075#subdirectory=python/triton_kernels"
 ```
 
-## 🚀 Sử dụng
+## Sử dụng
 
 ### 1. Training Model
 
@@ -168,7 +168,7 @@ python main.py --force-reload
 - **Tiết kiệm băng thông**: Không cần tải lại model khi đã có cache
 - **Hiệu quả**: Tự động detect thay đổi dataset và config
 
-## 📊 Dataset Format
+## Dataset Format
 
 Dataset sử dụng format JSONL với cấu trúc messages:
 
@@ -223,7 +223,7 @@ Dataset sử dụng format JSONL với cấu trúc messages:
    - Kích hoạt đúng conda environment: `conda activate gptoss`
    - Cài đặt lại dependencies
 
-## 🚀 Workflow hoàn chỉnh
+## Workflow hoàn chỉnh
 
 1. **Chuẩn bị**:
    ```bash
@@ -244,7 +244,7 @@ Dataset sử dụng format JSONL với cấu trúc messages:
 4. **Chat interactive**:
    ```
    👤 You: Bên em dùng thử CRM 7 ngày rồi nhưng team chưa quen, giá gói Standard là bao nhiêu?
-   🤖 Assistant: Ý định: Hỏi giá/chi phí, Yêu cầu dùng thử/demo
+   Assistant: Ý định: Hỏi giá/chi phí, Yêu cầu dùng thử/demo
    Nỗi lo: Team chưa quen sử dụng
    Phản hồi gợi ý: Cung cấp khung giá rõ ràng...
    ```

@@ -82,23 +82,23 @@ class DataLoader:
         
         # Check if dataset is not empty
         if len(dataset) == 0:
-            print("❌ Dataset is empty")
+            print("Dataset is empty")
             return False
             
         # Check required columns
         required_columns = ['text']
         for col in required_columns:
             if col not in dataset.column_names:
-                print(f"❌ Missing required column: {col}")
+                print(f"Missing required column: {col}")
                 return False
                 
         # Check sample data
         sample = dataset[0]
         if not sample['text'] or len(sample['text'].strip()) == 0:
-            print("❌ Empty text in sample data")
+            print("Empty text in sample data")
             return False
             
-        print(f"✅ Dataset validation passed. {len(dataset)} examples ready for training.")
+        print(f"Dataset validation passed. {len(dataset)} examples ready for training.")
         return True
 
 def load_and_prepare_data(tokenizer) -> Dataset:

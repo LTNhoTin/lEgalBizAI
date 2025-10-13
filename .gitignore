@@ -34,20 +34,94 @@ wheels/
 *.egg
 MANIFEST
 
-# Model and Cache Files
+# Model Files and Weights
 *.pkl
 *.bin
 *.safetensors
 *.h5
 *.ckpt
 *.pth
+*.pt
 *.model
+*.weights
+*.onnx
+*.tflite
+*.pb
+*.joblib
+*.dill
+*.msgpack
+
+# Model Directories
 models/
+model/
 checkpoints/
-.cache/
-logs/
+checkpoint/
+checkpoint-*/
+output/
 outputs/
+saved_models/
+pretrained_models/
+fine_tuned_models/
+final_model/
+
+# Embedding Model Specific
+finetune/embedding_models/*/output/
+finetune/embedding_models/*/models/
+finetune/embedding_models/*/checkpoint*/
+finetune/embedding_models/*/wandb/
+finetune/embedding_models/all_minilm_l6_v2/output/
+finetune/embedding_models/baai_bge_m3/models/
+finetune/embedding_models/google_gemma_embeddings/output/
+
+# Training and Logging Files
+logs/
+*.log
+*.logs
+wandb/
+runs/
+tensorboard_logs/
+mlruns/
+.wandb/
+wandb-metadata.json
+wandb-summary.json
+
+# Cache and Temporary Files
+.cache/
+cache/
+tmp/
+temp/
+*.tmp
+*.temp
 unsloth_compiled_cache/
+transformers_cache/
+huggingface_cache/
+.transformers_cache/
+
+# Large Data Files
+*.csv
+*.tsv
+*.json
+*.jsonl
+*.parquet
+*.feather
+*.arrow
+*.hdf5
+*.h5
+*.npz
+*.npy
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+
+# Exclude specific large files but allow config files
+!config.yaml
+!config.json
+!requirements.txt
+!README.md
+!*.py
 
 # System and Build Files
 .DS_Store
@@ -73,3 +147,28 @@ venv.bak/
 # OS Files
 Thumbs.db
 .DS_Store
+
+# GPU and CUDA Files
+*.cu
+*.cuh
+*.cubin
+*.fatbin
+*.ptx
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+*.ipynb
+
+# PyTorch Lightning
+lightning_logs/
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# DVC (Data Version Control)
+.dvc/
+*.dvc
+
+# Git LFS
+*.lfs

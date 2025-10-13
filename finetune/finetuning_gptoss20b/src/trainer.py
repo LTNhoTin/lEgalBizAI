@@ -68,9 +68,9 @@ class GPTTrainer:
                     files_removed += 1
                     print(f"🗑️ Removed {filename}")
                 except Exception as e:
-                    print(f"⚠️ Failed to remove {filename}: {e}")
+                    print(f"Failed to remove {filename}: {e}")
         
-        print(f"✅ Cleared {files_removed} cache files ({cache_type})")
+        print(f"Cleared {files_removed} cache files ({cache_type})")
     
     def get_cache_info(self):
         """Get information about cached files"""
@@ -94,11 +94,11 @@ class GPTTrainer:
                     dataset_files.append((filename, size))
         
         print(f"📁 Cache Directory: {self.cache_dir}")
-        print(f"📊 Total Size: {total_size / (1024*1024):.2f} MB")
-        print(f"🤖 Model Cache Files: {len(model_files)}")
+        print(f"Total Size: {total_size / (1024*1024):.2f} MB")
+        print(f"Model Cache Files: {len(model_files)}")
         for filename, size in model_files:
             print(f"   - {filename} ({size / (1024*1024):.2f} MB)")
-        print(f"📋 Dataset Cache Files: {len(dataset_files)}")
+        print(f"Dataset Cache Files: {len(dataset_files)}")
         for filename, size in dataset_files:
             print(f"   - {filename} ({size / (1024*1024):.2f} MB)")
         
@@ -129,7 +129,7 @@ class GPTTrainer:
                 }, f)
             print(f"💾 Model cached to {cache_path}")
         except Exception as e:
-            print(f"⚠️ Failed to cache model: {e}")
+            print(f"Failed to cache model: {e}")
     
     def _load_model_cache(self):
         """Load model and tokenizer from cache if available"""
@@ -164,10 +164,10 @@ class GPTTrainer:
                     use_rslora=config.model.use_rslora,
                 )
                 
-                print("✅ Model loaded from cache")
+                print("Model loaded from cache")
                 return True
             except Exception as e:
-                print(f"⚠️ Failed to load cached model: {e}")
+                print(f"Failed to load cached model: {e}")
                 return False
         return False
     
@@ -175,10 +175,10 @@ class GPTTrainer:
         """Setup model and tokenizer with caching"""
         # Check if model is already loaded and not forcing reload
         if not force_reload and self.is_model_loaded():
-            print("✅ Model already loaded, skipping setup...")
+            print("Model already loaded, skipping setup...")
             return
             
-        print("🚀 Setting up model and tokenizer...")
+        print("Setting up model and tokenizer...")
         print(f"Model: {config.model.model_name}")
         print(f"Max sequence length: {config.model.max_seq_length}")
         print(f"4-bit quantization: {config.model.load_in_4bit}")
@@ -215,7 +215,7 @@ class GPTTrainer:
         # Cache the model for future use
         self._save_model_cache()
         self._model_loaded = True
-        print("✅ Model setup completed")
+        print("Model setup completed")
         
     def test_model_before_training(self):
         """Test model before training"""
@@ -279,7 +279,7 @@ class GPTTrainer:
                     pickle.dump(self.dataset, f)
                 print(f"💾 Dataset cached to {cache_path}")
             except Exception as e:
-                print(f"⚠️ Failed to cache dataset: {e}")
+                print(f"Failed to cache dataset: {e}")
     
     def _load_data_cache(self):
         """Load processed dataset from cache if available"""
@@ -291,20 +291,20 @@ class GPTTrainer:
                     print(f"📦 Loading cached dataset from {cache_path}")
                     with open(cache_path, 'rb') as f:
                         self.dataset = pickle.load(f)
-                    print(f"✅ Dataset loaded from cache: {len(self.dataset)} examples")
+                    print(f"Dataset loaded from cache: {len(self.dataset)} examples")
                     return True
                 except Exception as e:
-                    print(f"⚠️ Failed to load cached dataset: {e}")
+                    print(f"Failed to load cached dataset: {e}")
         return False
     
     def load_data(self, force_reload=False):
         """Load and prepare training data with caching support"""
         # Check if data is already loaded and not forcing reload
         if not force_reload and self.is_data_loaded():
-            print("✅ Data already loaded, skipping...")
+            print("Data already loaded, skipping...")
             return
             
-        print("\n📊 Loading training data...")
+        print("\nLoading training data...")
         
         # Try to load from cache first
         if not force_reload and self._load_data_cache():
@@ -313,7 +313,7 @@ class GPTTrainer:
         
         print("🔄 Processing dataset from scratch...")
         self.dataset = load_and_prepare_data(self.tokenizer)
-        print(f"✅ Data loaded: {len(self.dataset)} examples")
+        print(f"Data loaded: {len(self.dataset)} examples")
         
         # Cache the processed dataset
         self._save_data_cache()
@@ -323,7 +323,7 @@ class GPTTrainer:
         """Setup SFT trainer"""
         # Check if trainer is already setup and not forcing reload
         if not force_reload and self.is_trainer_setup():
-            print("✅ Trainer already setup, skipping...")
+            print("Trainer already setup, skipping...")
             return
             
         print("\n⚙️ Setting up trainer...")
@@ -362,7 +362,7 @@ class GPTTrainer:
             args=training_args,
         )
         
-        print("✅ Trainer setup completed")
+        print("Trainer setup completed")
         self._trainer_setup = True
         
     def train(self) -> Dict[str, Any]:
@@ -378,7 +378,7 @@ class GPTTrainer:
         end_time = datetime.now()
         
         training_time = end_time - start_time
-        print(f"\n✅ Training completed in {training_time}")
+        print(f"\nTraining completed in {training_time}")
         
         return trainer_stats
         
@@ -430,12 +430,12 @@ class GPTTrainer:
         self.model.save_pretrained(save_path)
         self.tokenizer.save_pretrained(save_path)
         
-        print(f"✅ Model saved successfully to {save_path}")
+        print(f"Model saved successfully to {save_path}")
         return save_path
         
     def run_full_training_pipeline(self, force_reload=False) -> str:
         """Run the complete training pipeline"""
-        print("🚀 Starting GPT-OSS 20B Finetuning Pipeline")
+        print("Starting GPT-OSS 20B Finetuning Pipeline")
         print("=" * 60)
         
         try:
@@ -452,14 +452,14 @@ class GPTTrainer:
             self.test_model_after_training()
             model_path = self.save_model()
             
-            print("\n🎉 Training pipeline completed successfully!")
+            print("\nTraining pipeline completed successfully!")
             print(f"📁 Model saved at: {model_path}")
             print("=" * 60)
             
             return model_path
             
         except Exception as e:
-            print(f"\n❌ Training failed with error: {str(e)}")
+            print(f"\nTraining failed with error: {str(e)}")
             raise e
 
 def main():

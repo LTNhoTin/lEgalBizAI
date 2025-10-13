@@ -170,7 +170,7 @@ if __name__ == "__main__":
     print(f"\n🔑 API Key: {API_KEY}")
     print("\n📖 API Documentation: http://localhost:7777/docs")
     print("\n🌐 Production URL: https://nhotin.space:7777")
-    print("\n🚀 Starting FastAPI server...")
+    print("\nStarting FastAPI server...")
     
     uvicorn.run(
         app,

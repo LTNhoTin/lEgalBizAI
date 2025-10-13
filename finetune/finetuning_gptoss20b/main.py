@@ -23,18 +23,18 @@ def setup_environment():
     
     # Check if dataset exists
     if not os.path.exists(config.data.dataset_path):
-        print(f"❌ Dataset not found at {config.data.dataset_path}")
+        print(f"Dataset not found at {config.data.dataset_path}")
         print("Please ensure the dataset file exists before running training.")
         sys.exit(1)
     
-    print(f"✅ Dataset found: {config.data.dataset_path}")
-    print(f"✅ Models directory: {config.models_dir}")
-    print(f"✅ Logs directory: {config.logs_dir}")
-    print(f"✅ Output directory: {config.training.output_dir}")
+    print(f"Dataset found: {config.data.dataset_path}")
+    print(f"Models directory: {config.models_dir}")
+    print(f"Logs directory: {config.logs_dir}")
+    print(f"Output directory: {config.training.output_dir}")
 
 def print_config():
     """Print current configuration"""
-    print("\n📋 Current Configuration:")
+    print("\nCurrent Configuration:")
     print("-" * 40)
     print(f"Model: {config.model.model_name}")
     print(f"Max sequence length: {config.model.max_seq_length}")
@@ -102,7 +102,7 @@ def main():
     if args.learning_rate:
         config.training.learning_rate = args.learning_rate
     
-    print("🚀 GPT-OSS 20B Finetuning Project")
+    print("GPT-OSS 20B Finetuning Project")
     print("=" * 50)
     print(f"Start time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
@@ -138,7 +138,7 @@ def main():
             custom_path = trainer.save_model(args.model_name)
             print(f"\n📁 Model also saved with custom name: {custom_path}")
         
-        print("\n🎉 Training completed successfully!")
+        print("\nTraining completed successfully!")
         print(f"📁 Final model location: {model_path}")
         print(f"⏰ Completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         
@@ -149,10 +149,10 @@ def main():
         print("3. Check training logs in the outputs directory")
         
     except KeyboardInterrupt:
-        print("\n⚠️ Training interrupted by user")
+        print("\nTraining interrupted by user")
         sys.exit(1)
     except Exception as e:
-        print(f"\n❌ Training failed: {str(e)}")
+        print(f"\nTraining failed: {str(e)}")
         print("\n🔍 Troubleshooting tips:")
         print("1. Check if you have enough GPU memory")
         print("2. Verify dataset format is correct")
