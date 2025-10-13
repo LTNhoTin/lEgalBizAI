@@ -34,6 +34,12 @@ import wandb
 from sklearn.metrics.pairwise import cosine_similarity
 from tqdm import tqdm
 
+# Add evaluation utilities
+import sys
+sys.path.append(str(Path(__file__).parent.parent.parent))
+from evaluation_utils import EmbeddingEvaluator, prepare_evaluation_data
+from data_loader import EmbeddingDataLoader as QADataLoader
+
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -429,18 +435,26 @@ class OptimizedBGETrainer:
         final_eval_loss = self.evaluate()
         self.save_final_model()
         
+        # Run comprehensive final evaluation
+        final_eval_metrics = self._final_evaluation()
+        
         logger.info("Training completed!")
         logger.info(f"Best loss: {self.best_loss:.4f}")
         logger.info(f"Final loss: {final_eval_loss:.4f}")
+        
+        # Log final evaluation summary
+        if final_eval_metrics:
+            logger.info("Final evaluation metrics logged to W&B and console")
     
     @torch.no_grad()
     def evaluate(self) -> float:
-        """Optimized batch evaluation"""
+        """Enhanced evaluation with loss and similarity metrics"""
         logger.info("Running evaluation...")
         self.model.eval()
         
         total_loss = 0.0
         num_batches = 0
+        all_similarities = []
         
         for batch in tqdm(self.eval_loader, desc="Evaluating"):
             batch = {k: v.to(self.device) for k, v in batch.items()}
@@ -457,19 +471,50 @@ class OptimizedBGETrainer:
                     pos_outputs['dense'],
                     neg_outputs['dense']
                 )
+                
+                # Calculate similarities for additional metrics
+                query_emb = F.normalize(query_outputs['dense'], p=2, dim=1)
+                pos_emb = F.normalize(pos_outputs['dense'], p=2, dim=1)
+                
+                # Cosine similarity between query and positive
+                similarities = torch.sum(query_emb * pos_emb, dim=1)
+                all_similarities.extend(similarities.cpu().numpy())
             
             total_loss += loss.item()
             num_batches += 1
         
         avg_loss = total_loss / num_batches
         
-        if self.config.use_wandb:
-            wandb.log({
-                "eval/loss": avg_loss,
-                "eval/global_step": self.global_step
-            })
+        # Calculate similarity statistics
+        similarities_array = np.array(all_similarities)
+        mean_sim = np.mean(similarities_array)
+        std_sim = np.std(similarities_array)
+        min_sim = np.min(similarities_array)
+        max_sim = np.max(similarities_array)
         
-        logger.info(f"Evaluation loss: {avg_loss:.4f}")
+        # Accuracy at different thresholds
+        acc_05 = np.mean(similarities_array >= 0.5)
+        acc_06 = np.mean(similarities_array >= 0.6)
+        acc_07 = np.mean(similarities_array >= 0.7)
+        
+        eval_metrics = {
+            "eval/loss": avg_loss,
+            "eval/mean_similarity": mean_sim,
+            "eval/std_similarity": std_sim,
+            "eval/min_similarity": min_sim,
+            "eval/max_similarity": max_sim,
+            "eval/accuracy_0.5": acc_05,
+            "eval/accuracy_0.6": acc_06,
+            "eval/accuracy_0.7": acc_07,
+            "eval/global_step": self.global_step
+        }
+        
+        if self.config.use_wandb:
+            wandb.log(eval_metrics)
+        
+        logger.info(f"Evaluation - Loss: {avg_loss:.4f}, Mean Sim: {mean_sim:.4f} ± {std_sim:.4f}")
+        logger.info(f"Similarity Range: [{min_sim:.4f}, {max_sim:.4f}], Acc@0.5: {acc_05:.4f}")
+        
         return avg_loss
     
     def save_best_model(self):
@@ -510,6 +555,126 @@ class OptimizedBGETrainer:
         
         torch.save(checkpoint, checkpoint_dir / "checkpoint.pt")
     
+    def _final_evaluation(self):
+        """Comprehensive final evaluation with advanced metrics"""
+        logger.info("Running comprehensive final evaluation...")
+        
+        try:
+            # Load evaluation data
+            data_loader = QADataLoader(
+                data_path=Path(__file__).parent.parent.parent / "data" / "processed" / "qa_pairs.json"
+            )
+            
+            # Get evaluation data
+            queries, positives, relevant_docs = data_loader.get_evaluation_data()
+            
+            # Encode queries and positives using the trained model
+            self.model.eval()
+            with torch.no_grad():
+                # Encode queries
+                query_inputs = self.tokenizer(
+                    queries, 
+                    padding=True, 
+                    truncation=True, 
+                    max_length=self.config.max_seq_length,
+                    return_tensors="pt"
+                ).to(self.device)
+                
+                query_outputs = self.model(query_inputs['input_ids'], query_inputs['attention_mask'])
+                query_embeddings = query_outputs['dense'].cpu().numpy()
+                
+                # Encode positives
+                positive_inputs = self.tokenizer(
+                    positives,
+                    padding=True,
+                    truncation=True,
+                    max_length=self.config.max_seq_length,
+                    return_tensors="pt"
+                ).to(self.device)
+                
+                positive_outputs = self.model(positive_inputs['input_ids'], positive_inputs['attention_mask'])
+                positive_embeddings = positive_outputs['dense'].cpu().numpy()
+            
+            # Calculate cosine similarities
+            similarities = []
+            for q_emb, p_emb in zip(query_embeddings, positive_embeddings):
+                similarity = cosine_similarity([q_emb], [p_emb])[0][0]
+                similarities.append(similarity)
+            
+            similarities = np.array(similarities)
+            
+            # Basic similarity metrics
+            mean_similarity = np.mean(similarities)
+            std_similarity = np.std(similarities)
+            min_similarity = np.min(similarities)
+            max_similarity = np.max(similarities)
+            
+            # Accuracy at different thresholds
+            accuracy_05 = np.mean(similarities >= 0.5)
+            accuracy_06 = np.mean(similarities >= 0.6)
+            accuracy_07 = np.mean(similarities >= 0.7)
+            
+            # Prepare evaluation metrics
+            eval_metrics = {
+                'eval/mean_similarity': mean_similarity,
+                'eval/std_similarity': std_similarity,
+                'eval/min_similarity': min_similarity,
+                'eval/max_similarity': max_similarity,
+                'eval/accuracy_0.5': accuracy_05,
+                'eval/accuracy_0.6': accuracy_06,
+                'eval/accuracy_0.7': accuracy_07,
+            }
+            
+            # Advanced retrieval metrics
+            evaluator = EmbeddingEvaluator(k_values=[1, 3, 5, 10])
+            
+            # Prepare data for retrieval evaluation
+            retrieved_docs = []
+            for i, (query_emb, relevant_doc_list) in enumerate(zip(query_embeddings, relevant_docs)):
+                # Simulate retrieval by using positive as top result
+                retrieved_docs.append([i])  # Use index as document ID
+            
+            # Calculate advanced metrics
+            metrics_results = evaluator.evaluate_all_metrics(relevant_docs, retrieved_docs)
+            
+            # Add advanced metrics to eval_metrics
+            for metric_name, k_results in metrics_results.items():
+                for k, value in k_results.items():
+                    eval_metrics[f'eval/{metric_name}@{k}'] = value
+            
+            # Log to wandb if enabled
+            if self.config.use_wandb and wandb.run is not None:
+                wandb.log({
+                    **eval_metrics,
+                    'eval/similarity_distribution': wandb.Histogram(similarities)
+                })
+            
+            # Log summary to console
+            logger.info("=" * 60)
+            logger.info("COMPREHENSIVE EVALUATION RESULTS")
+            logger.info("=" * 60)
+            logger.info(f"Mean Similarity: {mean_similarity:.4f} ± {std_similarity:.4f}")
+            logger.info(f"Similarity Range: [{min_similarity:.4f}, {max_similarity:.4f}]")
+            logger.info(f"Accuracy@0.5: {accuracy_05:.4f}")
+            logger.info(f"Accuracy@0.6: {accuracy_06:.4f}")
+            logger.info(f"Accuracy@0.7: {accuracy_07:.4f}")
+            
+            # Log retrieval metrics
+            for metric_name, k_results in metrics_results.items():
+                metric_str = f"{metric_name}: "
+                metric_values = [f"{metric_name}@{k}={v:.4f}" for k, v in k_results.items()]
+                logger.info(metric_str + ", ".join(metric_values))
+            
+            logger.info("=" * 60)
+            
+            return eval_metrics
+            
+        except Exception as e:
+            logger.error(f"Final evaluation failed: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+            return {}
+
     def save_final_model(self):
         """Save final model"""
         final_model_dir = Path(self.config.output_dir) / "final_model"

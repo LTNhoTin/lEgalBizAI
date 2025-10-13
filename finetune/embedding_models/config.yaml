@@ -78,7 +78,7 @@ models:
   # 2 BAAI BGE-M3 
   # =====================================================
   bge_m3:
-    enabled: true
+    enabled: false
     model_name: "BAAI/bge-m3"
     batch_size: 2              
     num_epochs: 30
