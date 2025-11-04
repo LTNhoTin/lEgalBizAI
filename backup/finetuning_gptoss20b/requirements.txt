@@ -1,0 +1,27 @@
+# Core dependencies
+torch>=2.8.0
+triton>=3.4.0
+numpy
+torchvision
+bitsandbytes
+transformers
+datasets
+trl
+accelerate
+peft
+
+# Unsloth dependencies
+# Note: Install with: pip install "unsloth[base] @ git+https://github.com/unslothai/unsloth"
+unsloth[base] @ git+https://github.com/unslothai/unsloth
+
+# Additional utilities
+colorama
+tqdm
+psutil
+
+# FastAPI server dependencies
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart
+
+# Note: Use setup_environment.sh script for automated installation

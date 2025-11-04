@@ -5,7 +5,7 @@ import json
 from typing import Dict, List, Any
 from datasets import load_dataset, Dataset
 from unsloth.chat_templates import standardize_sharegpt
-from config.config import config
+from config.config import config, SYSTEM_MESSAGES
 
 class DataLoader:
     """Handle data loading and preprocessing for finetuning"""
@@ -19,13 +19,41 @@ class DataLoader:
         self.tokenizer = tokenizer
         
     def load_dataset(self) -> Dataset:
-        """Load dataset from JSONL file"""
+        """Load dataset from JSON file"""
         if not os.path.exists(self.dataset_path):
             raise FileNotFoundError(f"Dataset not found at {self.dataset_path}")
             
         print(f"Loading dataset from {self.dataset_path}")
-        dataset = load_dataset("json", data_files=self.dataset_path, split="train")
-        print(f"Loaded {len(dataset)} examples")
+        
+        # Load JSON data
+        with open(self.dataset_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        # Convert to ShareGPT format
+        converted_data = []
+        for item in data:
+            # Create conversation format
+            conversation = {
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": SYSTEM_MESSAGES["legal_assistant"]
+                    },
+                    {
+                        "role": "user", 
+                        "content": item["question"]
+                    },
+                    {
+                        "role": "assistant",
+                        "content": item["answer"]
+                    }
+                ]
+            }
+            converted_data.append(conversation)
+        
+        # Create dataset from converted data
+        dataset = Dataset.from_list(converted_data)
+        print(f"Loaded and converted {len(dataset)} examples")
         
         return dataset
     

@@ -30,12 +30,44 @@ class ModelConfig:
             ]
 
 @dataclass
+class WandbConfig:
+    """Wandb configuration"""
+    use_wandb: bool = True
+    project_name: str = "legal-gpt-oss-20b-finetune"
+    run_name: Optional[str] = None
+    entity: Optional[str] = None
+    tags: List[str] = None
+    notes: str = "Fine-tuning GPT-OSS-20B for Vietnamese Legal QA"
+    log_model: bool = True
+    watch_model: bool = True
+    log_gradients: bool = True
+    log_parameters: bool = True
+    
+    def __post_init__(self):
+        if self.tags is None:
+            self.tags = ["gpt-oss-20b", "legal-qa", "vietnamese", "fine-tuning"]
+        if self.run_name is None:
+            from datetime import datetime
+            self.run_name = f"gpt-oss-20b-legal-{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+
+@dataclass
+class TargetMetrics:
+    """Target metrics for evaluation"""
+    faithfulness: float = 0.90  # ≥ 90%
+    context_precision: float = 0.85  # ≥ 85%
+    maliciousness: float = 0.01  # ≤ 1%
+    rouge_l: float = 0.8  # ≥ 0.8
+    bleu: float = 0.8  # ≥ 0.8
+    human_eval: float = 4.0  # ≥ 4/5
+    latency: float = 5.0  # < 5s
+
+@dataclass
 class TrainingConfig:
     """Training configuration"""
     per_device_train_batch_size: int = 1
     gradient_accumulation_steps: int = 4
     warmup_steps: int = 5
-    num_train_epochs: int = 1
+    num_train_epochs: int = 30
     max_steps: Optional[int] = None
     learning_rate: float = 2e-4
     logging_steps: int = 1
@@ -44,16 +76,24 @@ class TrainingConfig:
     lr_scheduler_type: str = "linear"
     seed: int = 3407
     output_dir: str = "outputs"
-    report_to: str = "none"
+    report_to: str = "wandb"
     save_steps: int = 500
     save_total_limit: int = 2
     dataloader_num_workers: int = 0
     remove_unused_columns: bool = False
     
+    # Evaluation settings
+    eval_steps: int = 100
+    evaluation_strategy: str = "steps"
+    save_strategy: str = "steps"
+    load_best_model_at_end: bool = True
+    metric_for_best_model: str = "eval_loss"
+    greater_is_better: bool = False
+    
 @dataclass
 class DataConfig:
     """Data configuration"""
-    dataset_path: str = "data/sale_marketing_finetune_dataset.jsonl"
+    dataset_path: str = "../data_finetunning/qaset_full_article.json"
     test_size: float = 0.1
     random_state: int = 42
     
@@ -73,6 +113,8 @@ class ProjectConfig:
     training: TrainingConfig = None
     data: DataConfig = None
     inference: InferenceConfig = None
+    wandb: WandbConfig = None
+    target_metrics: TargetMetrics = None
     
     # Paths
     project_root: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -88,6 +130,10 @@ class ProjectConfig:
             self.data = DataConfig()
         if self.inference is None:
             self.inference = InferenceConfig()
+        if self.wandb is None:
+            self.wandb = WandbConfig()
+        if self.target_metrics is None:
+            self.target_metrics = TargetMetrics()
             
         # Update paths to be absolute
         self.models_dir = os.path.join(self.project_root, self.models_dir)
@@ -100,6 +146,7 @@ config = ProjectConfig()
 
 # System messages for different personas
 SYSTEM_MESSAGES = {
+    "legal_assistant": "Bạn là trợ lý pháp lý chuyên nghiệp, có kiến thức sâu rộng về luật pháp Việt Nam. Bạn sẽ trả lời các câu hỏi pháp lý một cách chính xác, chi tiết và dễ hiểu, luôn dẫn chiếu các điều luật cụ thể.",
     "sale_marketing": "Bạn là Trợ lý Sale Marketing, chuyên phân tích tin nhắn khách hàng và đề xuất chiến lược bán hàng ngắn gọn, thực dụng. Luôn nêu: Ý định, Nỗi lo, Phản hồi gợi ý, CTA, Bước tiếp theo.",
     "nhotin": "Bạn là NhoTin, lập trình viên tại nhà, luôn đam mê khám phá công nghệ mới, và thích chia sẻ kiến thức với người khác",
     "thang_nguyen": "Bạn là Thang Nguyen, lập trình viên tại Ngân hàng SHB, luôn đam mê khám phá công nghệ mới"

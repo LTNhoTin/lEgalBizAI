@@ -2,15 +2,84 @@
 
 import os
 import torch
+import gc
+import subprocess
 from datetime import datetime
 from typing import Optional, Dict, Any
 from unsloth import FastLanguageModel
 from trl import SFTConfig, SFTTrainer
-from transformers import TextStreamer
+from transformers import TextStreamer, TrainerCallback
 from config.config import config
 from src.data_loader import load_and_prepare_data
 import pickle
 import hashlib
+
+# Wandb imports
+try:
+    import wandb
+    WANDB_AVAILABLE = True
+except ImportError:
+    WANDB_AVAILABLE = False
+    print("⚠️ Wandb not available. Install with: pip install wandb")
+
+class WandbMetricsCallback(TrainerCallback):
+    """Custom Wandb callback for detailed metrics logging"""
+    
+    def __init__(self, target_metrics):
+        self.target_metrics = target_metrics
+        self.step_count = 0
+        
+    def on_log(self, args, state, control, logs=None, **kwargs):
+        """Log metrics to Wandb with additional analysis"""
+        if not WANDB_AVAILABLE or not wandb.run:
+            return
+            
+        if logs:
+            # Log basic training metrics
+            wandb.log(logs, step=state.global_step)
+            
+            # Log additional custom metrics
+            custom_metrics = {}
+            
+            if 'train_loss' in logs:
+                custom_metrics['train_loss_smoothed'] = logs['train_loss']
+                custom_metrics['loss_vs_target'] = logs['train_loss'] / 0.5  # Relative to target
+                
+            if 'learning_rate' in logs:
+                custom_metrics['learning_rate'] = logs['learning_rate']
+                
+            # Log target metrics comparison
+            custom_metrics.update({
+                'target_faithfulness': self.target_metrics.faithfulness,
+                'target_context_precision': self.target_metrics.context_precision,
+                'target_rouge_l': self.target_metrics.rouge_l,
+                'target_bleu': self.target_metrics.bleu,
+                'target_human_eval': self.target_metrics.human_eval,
+                'target_latency': self.target_metrics.latency,
+            })
+            
+            if custom_metrics:
+                wandb.log(custom_metrics, step=state.global_step)
+    
+    def on_train_begin(self, args, state, control, **kwargs):
+        """Log training start"""
+        if WANDB_AVAILABLE and wandb.run:
+            wandb.log({
+                "training_started": True,
+                "total_epochs": args.num_train_epochs,
+                "batch_size": args.per_device_train_batch_size,
+                "learning_rate": args.learning_rate,
+                "gradient_accumulation_steps": args.gradient_accumulation_steps,
+            })
+    
+    def on_train_end(self, args, state, control, **kwargs):
+        """Log training completion"""
+        if WANDB_AVAILABLE and wandb.run:
+            wandb.log({
+                "training_completed": True,
+                "final_step": state.global_step,
+                "total_training_time": state.log_history[-1].get('train_runtime', 0) if state.log_history else 0,
+            })
 
 class GPTTrainer:
     """Main trainer class for GPT-OSS 20B finetuning"""
@@ -27,6 +96,9 @@ class GPTTrainer:
         self._model_loaded = False
         self._data_loaded = False
         self._trainer_setup = False
+        
+        # Wandb callback
+        self.wandb_callback = None
     
     def is_model_loaded(self):
         """Check if model is already loaded"""
@@ -101,6 +173,132 @@ class GPTTrainer:
         print(f"Dataset Cache Files: {len(dataset_files)}")
         for filename, size in dataset_files:
             print(f"   - {filename} ({size / (1024*1024):.2f} MB)")
+    
+    def clear_vram(self):
+        """Clear VRAM and system memory"""
+        print("🧹 Clearing VRAM and memory...")
+        
+        # Clear model from memory
+        if self.model is not None:
+            del self.model
+            self.model = None
+            self._model_loaded = False
+        
+        if self.tokenizer is not None:
+            del self.tokenizer
+            self.tokenizer = None
+        
+        if self.trainer is not None:
+            del self.trainer
+            self.trainer = None
+            self._trainer_setup = False
+        
+        if self.dataset is not None:
+            del self.dataset
+            self.dataset = None
+            self._data_loaded = False
+        
+        # Force garbage collection
+        gc.collect()
+        
+        # Clear CUDA cache if available
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            torch.cuda.synchronize()
+            
+            # Get GPU memory info
+            allocated = torch.cuda.memory_allocated() / 1024**3
+            cached = torch.cuda.memory_reserved() / 1024**3
+            print(f"🔧 GPU Memory - Allocated: {allocated:.2f}GB, Cached: {cached:.2f}GB")
+        
+        print("✅ VRAM and memory cleared")
+    
+    def activate_conda_env(self, env_name="gptoss"):
+        """Activate conda environment"""
+        try:
+            print(f"🐍 Activating conda environment: {env_name}")
+            
+            # Check if conda is available
+            result = subprocess.run(['conda', '--version'], capture_output=True, text=True)
+            if result.returncode != 0:
+                print("❌ Conda not found. Please install conda first.")
+                return False
+            
+            # Check if environment exists
+            result = subprocess.run(['conda', 'env', 'list'], capture_output=True, text=True)
+            if env_name not in result.stdout:
+                print(f"❌ Conda environment '{env_name}' not found.")
+                print("Available environments:")
+                print(result.stdout)
+                return False
+            
+            print(f"✅ Conda environment '{env_name}' is available")
+            print("💡 Note: Please ensure you're running this script in the correct conda environment")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Error checking conda environment: {e}")
+            return False
+    
+    def setup_wandb(self):
+        """Setup Wandb logging"""
+        if not WANDB_AVAILABLE:
+            print("⚠️ Wandb not available, skipping setup")
+            return False
+        
+        if not config.wandb.use_wandb:
+            print("📊 Wandb disabled in config")
+            return False
+        
+        try:
+            print("📊 Setting up Wandb...")
+            
+            # Initialize wandb
+            wandb.init(
+                project=config.wandb.project_name,
+                name=config.wandb.run_name,
+                entity=config.wandb.entity,
+                tags=config.wandb.tags,
+                notes=config.wandb.notes,
+                config={
+                    "model": {
+                        "name": config.model.model_name,
+                        "max_seq_length": config.model.max_seq_length,
+                        "lora_r": config.model.lora_r,
+                        "lora_alpha": config.model.lora_alpha,
+                        "lora_dropout": config.model.lora_dropout,
+                    },
+                    "training": {
+                        "batch_size": config.training.per_device_train_batch_size,
+                        "gradient_accumulation_steps": config.training.gradient_accumulation_steps,
+                        "learning_rate": config.training.learning_rate,
+                        "num_epochs": config.training.num_train_epochs,
+                        "warmup_steps": config.training.warmup_steps,
+                        "weight_decay": config.training.weight_decay,
+                        "optimizer": config.training.optim,
+                    },
+                    "target_metrics": {
+                        "faithfulness": config.target_metrics.faithfulness,
+                        "context_precision": config.target_metrics.context_precision,
+                        "maliciousness": config.target_metrics.maliciousness,
+                        "rouge_l": config.target_metrics.rouge_l,
+                        "bleu": config.target_metrics.bleu,
+                        "human_eval": config.target_metrics.human_eval,
+                        "latency": config.target_metrics.latency,
+                    }
+                }
+            )
+            
+            # Setup callback
+            self.wandb_callback = WandbMetricsCallback(config.target_metrics)
+            
+            print(f"✅ Wandb initialized - Project: {config.wandb.project_name}")
+            print(f"🔗 Run URL: {wandb.run.url}")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Failed to setup Wandb: {e}")
+            return False
         
     def _get_model_cache_key(self):
         """Generate cache key based on model configuration"""
@@ -346,6 +544,15 @@ class GPTTrainer:
             "save_total_limit": config.training.save_total_limit,
             "dataloader_num_workers": config.training.dataloader_num_workers,
             "remove_unused_columns": config.training.remove_unused_columns,
+            "eval_steps": config.training.eval_steps,
+            "evaluation_strategy": config.training.evaluation_strategy,
+            "save_strategy": config.training.save_strategy,
+            "load_best_model_at_end": config.training.load_best_model_at_end,
+            "metric_for_best_model": config.training.metric_for_best_model,
+            "greater_is_better": config.training.greater_is_better,
+            "logging_first_step": True,
+            "log_level": "info",
+            "disable_tqdm": False,
         }
         
         # Only add max_steps if it's not None
@@ -354,12 +561,19 @@ class GPTTrainer:
             
         training_args = SFTConfig(**training_args_dict)
         
+        # Prepare callbacks
+        callbacks = []
+        if self.wandb_callback is not None:
+            callbacks.append(self.wandb_callback)
+            print("📊 Added Wandb callback for detailed logging")
+        
         # Create trainer
         self.trainer = SFTTrainer(
             model=self.model,
             tokenizer=self.tokenizer,
             train_dataset=self.dataset,
             args=training_args,
+            callbacks=callbacks,
         )
         
         print("Trainer setup completed")
@@ -373,14 +587,76 @@ class GPTTrainer:
         print(f"Learning rate: {config.training.learning_rate}")
         print(f"Output directory: {config.training.output_dir}")
         
+        # Log initial GPU memory
+        if torch.cuda.is_available():
+            allocated = torch.cuda.memory_allocated() / 1024**3
+            cached = torch.cuda.memory_reserved() / 1024**3
+            print(f"🔧 Initial GPU Memory - Allocated: {allocated:.2f}GB, Cached: {cached:.2f}GB")
+        
+        # Watch model with Wandb if available
+        if WANDB_AVAILABLE and wandb.run and config.wandb.watch_model:
+            wandb.watch(self.model, log="all", log_freq=config.training.logging_steps)
+            print("👁️ Wandb watching model for gradients and parameters")
+        
         start_time = datetime.now()
-        trainer_stats = self.trainer.train()
-        end_time = datetime.now()
+        print(f"🕐 Training started at: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
         
-        training_time = end_time - start_time
-        print(f"\nTraining completed in {training_time}")
-        
-        return trainer_stats
+        try:
+            trainer_stats = self.trainer.train()
+            
+            end_time = datetime.now()
+            training_time = end_time - start_time
+            
+            print(f"\n✅ Training completed successfully!")
+            print(f"⏱️ Total training time: {training_time}")
+            print(f"🕐 Completed at: {end_time.strftime('%Y-%m-%d %H:%M:%S')}")
+            
+            # Log final metrics to Wandb
+            if WANDB_AVAILABLE and wandb.run:
+                final_metrics = {
+                    "training_time_seconds": training_time.total_seconds(),
+                    "training_time_hours": training_time.total_seconds() / 3600,
+                    "final_train_loss": trainer_stats.training_loss if hasattr(trainer_stats, 'training_loss') else None,
+                    "total_steps": trainer_stats.global_step if hasattr(trainer_stats, 'global_step') else None,
+                }
+                
+                # Add GPU memory info
+                if torch.cuda.is_available():
+                    final_metrics.update({
+                        "final_gpu_allocated_gb": torch.cuda.memory_allocated() / 1024**3,
+                        "final_gpu_cached_gb": torch.cuda.memory_reserved() / 1024**3,
+                        "max_gpu_allocated_gb": torch.cuda.max_memory_allocated() / 1024**3,
+                        "max_gpu_cached_gb": torch.cuda.max_memory_reserved() / 1024**3,
+                    })
+                
+                wandb.log(final_metrics)
+                print("📊 Final metrics logged to Wandb")
+            
+            # Print training statistics
+            if hasattr(trainer_stats, 'training_loss'):
+                print(f"📉 Final training loss: {trainer_stats.training_loss:.4f}")
+            
+            if hasattr(trainer_stats, 'global_step'):
+                print(f"📊 Total training steps: {trainer_stats.global_step}")
+            
+            return trainer_stats
+            
+        except Exception as e:
+            end_time = datetime.now()
+            training_time = end_time - start_time
+            
+            print(f"\n❌ Training failed after {training_time}")
+            print(f"Error: {str(e)}")
+            
+            # Log failure to Wandb
+            if WANDB_AVAILABLE and wandb.run:
+                wandb.log({
+                    "training_failed": True,
+                    "failure_time_seconds": training_time.total_seconds(),
+                    "error_message": str(e),
+                })
+            
+            raise e
         
     def test_model_after_training(self):
         """Test model after training"""
@@ -435,31 +711,84 @@ class GPTTrainer:
         
     def run_full_training_pipeline(self, force_reload=False) -> str:
         """Run the complete training pipeline"""
-        print("Starting GPT-OSS 20B Finetuning Pipeline")
+        print("🚀 Starting GPT-OSS 20B Finetuning Pipeline")
         print("=" * 60)
         
+        pipeline_start_time = datetime.now()
+        print(f"🕐 Pipeline started at: {pipeline_start_time.strftime('%Y-%m-%d %H:%M:%S')}")
+        
         try:
-            # Setup
+            # Setup Wandb if not already done
+            if WANDB_AVAILABLE and not wandb.run:
+                print("\n📊 Setting up Weights & Biases logging...")
+                self.setup_wandb()
+            
+            # Setup model
+            print("\n🤖 Setting up model...")
             self.setup_model(force_reload=force_reload)
+            
+            # Test model before training
+            print("\n🧪 Testing model before training...")
             self.test_model_before_training()
+            
+            # Load data
+            print("\n📊 Loading and preparing data...")
             self.load_data(force_reload=force_reload)
+            
+            # Setup trainer
+            print("\n🏋️ Setting up trainer...")
             self.setup_trainer(force_reload=force_reload)
             
             # Train
+            print("\n🚀 Starting training...")
             trainer_stats = self.train()
             
             # Test and save
+            print("\n🧪 Testing model after training...")
             self.test_model_after_training()
+            
+            print("\n💾 Saving model...")
             model_path = self.save_model()
             
-            print("\nTraining pipeline completed successfully!")
+            pipeline_end_time = datetime.now()
+            total_pipeline_time = pipeline_end_time - pipeline_start_time
+            
+            print(f"\n✅ Training pipeline completed successfully!")
+            print(f"⏱️ Total pipeline time: {total_pipeline_time}")
             print(f"📁 Model saved at: {model_path}")
             print("=" * 60)
+            
+            # Log pipeline completion to Wandb
+            if WANDB_AVAILABLE and wandb.run:
+                wandb.log({
+                    "pipeline_completed": True,
+                    "total_pipeline_time_seconds": total_pipeline_time.total_seconds(),
+                    "total_pipeline_time_hours": total_pipeline_time.total_seconds() / 3600,
+                    "model_save_path": model_path,
+                })
+                
+                # Finish wandb run
+                wandb.finish()
+                print("📊 Wandb run completed and logged")
             
             return model_path
             
         except Exception as e:
-            print(f"\nTraining failed with error: {str(e)}")
+            pipeline_end_time = datetime.now()
+            total_pipeline_time = pipeline_end_time - pipeline_start_time
+            
+            print(f"\n❌ Training pipeline failed after {total_pipeline_time}")
+            print(f"Error: {str(e)}")
+            
+            # Log failure to Wandb
+            if WANDB_AVAILABLE and wandb.run:
+                wandb.log({
+                    "pipeline_failed": True,
+                    "failure_time_seconds": total_pipeline_time.total_seconds(),
+                    "error_message": str(e),
+                })
+                wandb.finish()
+            
             raise e
 
 def main():
