@@ -7,7 +7,7 @@
 # -------------------------------
 general:
   # Dữ liệu huấn luyện
-  data_path: "/home/nhotin/work/LegalBizAI_project/finetune/data_finetunning/qaset_full_article.json"
+  data_path: "/home/nhotin/work/LegalBizAI_project/finetune/data_finetunning/qaset_article.json"
   test_split: 0.2
 
   # Logging (Weights & Biases)
@@ -36,7 +36,7 @@ models:
   # 1 GEMMA Embedding Model 
   # =====================================================
   gemma:
-    enabled: false  
+    enabled: true  
     model_name: "google/embeddinggemma-300m"
     max_seq_length: 512  # EmbeddingGemma supports up to 2K tokens, using 512 for efficiency
     embedding_dim: 768   # EmbeddingGemma default dimension (supports 768, 512, 256, 128 via Matryoshka)
@@ -44,18 +44,18 @@ models:
     # LoRA settings
     use_lora: true
     lora_r: 16
-    lora_alpha: 32
+    lora_alpha: 16  # Giảm từ 32 -> 16 để LoRA update nhẹ nhàng hơn
     lora_dropout: 0.1
     lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
 
     ## Training settings
     batch_size: 2
-    num_epochs: 30  
-    learning_rate: 0.00001
+    num_epochs: 24  
+    learning_rate: 0.000002  # Giảm từ 0.00001 -> 0.000002 (5x nhỏ hơn) để tránh loss spikes
     weight_decay: 0.01
-    warmup_ratio: 0.1
-    gradient_accumulation_steps: 4
-    max_grad_norm: 1.0
+    warmup_ratio: 0.2  # Tăng từ 0.1 -> 0.2 để warmup dài hơn, ổn định hơn
+    gradient_accumulation_steps: 8  # Tăng từ 4 -> 8 để effective batch size lớn hơn
+    max_grad_norm: 0.5  # Giảm từ 1.0 -> 0.5 để clip gradient chặt hơn
     dataloader_num_workers: 2
     
     # Precision settings (override general config for better stability)
@@ -78,10 +78,10 @@ models:
   # 2 BAAI BGE-M3 
   # =====================================================
   bge_m3:
-    enabled: false
+    enabled: true
     model_name: "BAAI/bge-m3"
     batch_size: 2              
-    num_epochs: 30
+    num_epochs: 6  
     learning_rate: 0.00001
     max_seq_length: 384
 
@@ -114,8 +114,8 @@ models:
   minilm:
     enabled: true
     model_name: "sentence-transformers/all-MiniLM-L6-v2"
-    batch_size: 32            
-    num_epochs: 30
+    batch_size: 128            
+    num_epochs: 30  
     learning_rate: 0.00002
     max_seq_length: 256
     embedding_dim: 384

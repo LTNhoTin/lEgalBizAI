@@ -145,6 +145,42 @@ class EmbeddingDataLoader:
         
         return triplets
     
+    def create_contrastive_pairs(self, data: List[Dict[str, Any]], num_negatives: int = 1) -> List[Dict[str, Any]]:
+        """
+        Create contrastive pairs (query, positive, negatives) for training
+        
+        Args:
+            data: List of QA pairs to create contrastive samples from
+            num_negatives: Number of negative samples per query
+            
+        Returns:
+            List of contrastive pairs with keys: 'query', 'positive', 'negatives'
+        """
+        contrastive_pairs = []
+        
+        for i, item in enumerate(data):
+            query = item['question']
+            positive = item['answer']
+            
+            # Generate negative samples
+            negatives = []
+            for _ in range(num_negatives):
+                # Random negative sampling from other answers
+                neg_idx = random.randint(0, len(data) - 1)
+                while neg_idx == i:  # Ensure negative is different from current item
+                    neg_idx = random.randint(0, len(data) - 1)
+                
+                negative = data[neg_idx]['answer']
+                negatives.append(negative)
+            
+            contrastive_pairs.append({
+                'query': query,
+                'positive': positive,
+                'negatives': negatives
+            })
+        
+        return contrastive_pairs
+    
     def get_sentence_transformer_examples(self, negative_samples: int = 1):
         """
         Get data in SentenceTransformer InputExample format

@@ -11,12 +11,7 @@ data/src/generaltools/tools_checkID/new/id_cof_fl_article.py
 data/src/generaltools/tools_checkID/new/id_cof_clause.py
 backend/retrieval/embedding
 
-# Python Cache Files
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
+# Python Build Files
 build/
 develop-eggs/
 dist/
@@ -33,6 +28,8 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+*.so
+*$py.class
 
 # Model Files and Weights
 *.pkl
@@ -64,20 +61,32 @@ pretrained_models/
 fine_tuned_models/
 final_model/
 
-# Embedding Model Specific
+# Embedding Model Specific - Ignore outputs, checkpoints, but allow source code
 finetune/embedding_models/*/output/
 finetune/embedding_models/*/models/
 finetune/embedding_models/*/checkpoint*/
+finetune/embedding_models/*/checkpoints/
 finetune/embedding_models/*/wandb/
 finetune/embedding_models/all_minilm_l6_v2/output/
 finetune/embedding_models/baai_bge_m3/models/
 finetune/embedding_models/google_gemma_embeddings/output/
 
+# But allow source code and config files in embedding_models
+!finetune/embedding_models/**/*.py
+!finetune/embedding_models/**/*.yaml
+!finetune/embedding_models/**/*.yml
+!finetune/embedding_models/**/*.ipynb
+!finetune/embedding_models/**/*.md
+!finetune/embedding_models/**/*.txt
+!finetune/embedding_models/**/src/
+
 # Training and Logging Files
 logs/
+**/logs/
 *.log
 *.logs
 wandb/
+**/wandb/
 runs/
 tensorboard_logs/
 mlruns/
@@ -88,6 +97,7 @@ wandb-summary.json
 # Cache and Temporary Files
 .cache/
 cache/
+**/cache/
 tmp/
 temp/
 *.tmp
@@ -96,17 +106,31 @@ unsloth_compiled_cache/
 transformers_cache/
 huggingface_cache/
 .transformers_cache/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
 
-# Large Data Files
-*.csv
-*.tsv
-*.json
-*.jsonl
+# Large Data Files - Ignore data directories but allow config files
+# Ignore large data files in specific directories
+data/raw/**/*.csv
+data/raw/**/*.json
+data/raw/**/*.jsonl
+data/processed/**/*.csv
+data/processed/**/*.json
+data/processed/**/*.jsonl
+finetune/data_finetunning/**/*.json
+finetune/data_finetunning/**/*.jsonl
+backend/data/**/*.json
+backend/data/**/*.csv
+
+# Ignore large binary data files
 *.parquet
 *.feather
 *.arrow
 *.hdf5
-*.h5
 *.npz
 *.npy
 *.zip
@@ -116,26 +140,55 @@ huggingface_cache/
 *.rar
 *.7z
 
-# Exclude specific large files but allow config files
-!config.yaml
-!config.json
-!requirements.txt
-!README.md
+# Allow config and small JSON files (but not large data files)
+!**/config.json
+!**/package.json
+!**/tsconfig.json
+!**/tailwind.config.*
+!**/vite.config.*
+!**/postcss.config.*
+!frontend/src/db/*.json
+!*.config.json
+
+# Allow all config YAML files
+!**/*.yaml
+!**/*.yml
+
+# Allow all Python files
 !*.py
+
+# Allow all Markdown files
+!*.md
+
+# Allow requirements and dependency files
+!requirements.txt
+!package.json
+!package-lock.json
+!poetry.lock
+!Pipfile
+!Pipfile.lock
 
 # System and Build Files
 .DS_Store
 **/node_modules/
 .vite
-dist
+frontend/dist/
+backend/dist/
 fullstack-env
 .env
+.env.local
+.env.*.local
 .venv
 env/
 venv/
 ENV/
 env.bak/
 venv.bak/
+
+# But allow frontend build config files
+!frontend/vite.config.*
+!frontend/tailwind.config.*
+!frontend/postcss.config.*
 
 # IDE Files
 .vscode/
@@ -155,9 +208,9 @@ Thumbs.db
 *.fatbin
 *.ptx
 
-# Jupyter Notebook Checkpoints
+# Jupyter Notebook Checkpoints (but allow notebooks themselves)
 .ipynb_checkpoints/
-*.ipynb
+**/.ipynb_checkpoints/
 
 # PyTorch Lightning
 lightning_logs/

@@ -330,21 +330,25 @@ class ModelTrainer:
         for i, model_name in enumerate(enabled_models, 1):
             self.logger.info(f"\n Training model {i}/{len(enabled_models)}: {model_name}")
             
-            # Additional cleanup before each model (except first)
-            if i > 1:
-                self.logger.info("Pre-training cleanup...")
-                self.kill_old_training_processes()
-                time.sleep(2)
+            # ALWAYS clear VRAM before EVERY model (including first)
+            self.logger.info("Pre-training cleanup...")
+            self.clear_vram()
+            self.kill_old_training_processes()
+            time.sleep(2)
             
             # Train the model
             success = self.train_single_model(model_name)
             
-            # Aggressive cleanup after each model (except the last one)
+            # Post-training cleanup after EVERY model
+            self.logger.info("Post-training cleanup...")
+            self.clear_vram()
+            self.kill_old_training_processes()
+            
+            # Log completion message
             if i < len(enabled_models):
-                self.logger.info("Post-training cleanup...")
-                self.clear_vram()
-                self.kill_old_training_processes()
                 self.logger.info(f"Completed {model_name}, preparing for next model...\n")
+            else:
+                self.logger.info(f"Completed {model_name} (final model)\n")
         
         # Print final summary
         self.print_summary()

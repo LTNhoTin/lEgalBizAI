@@ -84,8 +84,10 @@ class GemmaEmbeddingTrainer:
         console_handler.setFormatter(formatter)
         logger.addHandler(console_handler)
         
-        # File handler
-        log_file = Path(self.config.log_dir) / "training.log"
+        # File handler (create log directory if not exists)
+        log_dir = Path(self.config.log_dir)
+        log_dir.mkdir(parents=True, exist_ok=True)
+        log_file = log_dir / "training.log"
         file_handler = logging.FileHandler(log_file)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
