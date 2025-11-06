@@ -1,0 +1,31 @@
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: legalbizai_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Mount nginx configuration
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/legalbizai.conf:/etc/nginx/conf.d/legalbizai.conf:ro
+      # Mount Let's Encrypt SSL certificates
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      # Mount frontend build files
+      - ./frontend/dist:/usr/share/nginx/html:ro
+    networks:
+      - legalbizai_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "sh", "-c", "curl -f http://localhost/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  legalbizai_network:
+    driver: bridge
+
