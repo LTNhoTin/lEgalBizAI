@@ -18,3 +18,7 @@ __pycache__/
 **/.ipynb_checkpoints/
 **/unsloth_compiled_cache/
 *.log
+
+# Data files (too large for git)
+finetune/data_finetunning/*.json
+**/data_finetunning/*.json
