@@ -1,6 +1,5 @@
-# Chỉ ignore node_modules trên frontend
-frontend/node_modules/
-**/node_modules/
+# Ignore frontend folder
+frontend/
 
 # Python cache files
 __pycache__/
@@ -10,15 +9,37 @@ __pycache__/
 *.pyd
 .Python
 
-# Training artifacts
-**/checkpoints/
-**/output/
-**/wandb/
-**/logs/
-**/.ipynb_checkpoints/
-**/unsloth_compiled_cache/
-*.log
+# Model files and checkpoints
+*.safetensors
+*.pt
+*.bin
+*.ckpt
+*.pth
+checkpoint-*/
+outputs/
+finetuned_model/
+final_model/
+best_model/
+merged_model/
 
-# Data files (too large for git)
-finetune/data_finetunning/*.json
-**/data_finetunning/*.json
+# Wandb logs
+wandb/
+**/wandb/
+
+# Training outputs and logs
+*.log
+logs/
+runs/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# Cache directories
+unsloth_compiled_cache/
+**/unsloth_compiled_cache/
+
+# Large data files (keep structure but not large binaries)
+*.csv
+!**/evaluation/*.csv
+!**/eval/*.csv
