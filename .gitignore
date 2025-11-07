@@ -9,3 +9,12 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
+
+# Training artifacts
+**/checkpoints/
+**/output/
+**/wandb/
+**/logs/
+**/.ipynb_checkpoints/
+**/unsloth_compiled_cache/
+*.log
