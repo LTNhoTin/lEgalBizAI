@@ -1,0 +1,588 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1400">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1D4ED8;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10B981;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F59E0B;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#D97706;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6D28D9;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="redGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#DC2626;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#991B1B;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="tealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#14B8A6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0D9488;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Shadows -->
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-opacity="0.2"/>
+    </filter>
+    <filter id="shadowBig" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-opacity="0.25"/>
+    </filter>
+    
+    <!-- Arrow markers -->
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#6B7280" />
+    </marker>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#3B82F6" />
+    </marker>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#10B981" />
+    </marker>
+    <marker id="arrowOrange" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#F59E0B" />
+    </marker>
+    <marker id="arrowPurple" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#8B5CF6" />
+    </marker>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1600" height="1400" fill="#FAFAFA"/>
+  
+  <!-- Title Section -->
+  <text x="800" y="35" text-anchor="middle" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#111827">
+    LegalBizAI System Architecture
+  </text>
+  <text x="800" y="60" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#6B7280">
+    RAG-based Legal QA System | Vietnamese Enterprise Law 2020
+  </text>
+  <text x="800" y="78" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#9CA3AF">
+    Group 4 | DSP391m | Nguyễn Vũ Linh · Lê Tô Nho Tín | Supervisor: Huỳnh Văn Thống
+  </text>
+  
+  <!-- ========================================== -->
+  <!-- LAYER 1: FRONTEND -->
+  <!-- ========================================== -->
+  <g filter="url(#shadowBig)">
+    <rect x="60" y="100" width="1480" height="120" rx="12" fill="url(#blueGrad)" opacity="0.1"/>
+    <rect x="60" y="100" width="1480" height="120" rx="12" fill="none" stroke="url(#blueGrad)" stroke-width="3"/>
+  </g>
+  <text x="80" y="130" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#1D4ED8">
+    FRONTEND LAYER
+  </text>
+  
+  <!-- React UI -->
+  <g filter="url(#shadow)">
+    <rect x="200" y="145" width="280" height="60" rx="8" fill="white" stroke="#3B82F6" stroke-width="2"/>
+    <text x="340" y="168" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#1D4ED8">
+      React.js + Vite + TailwindCSS
+    </text>
+    <text x="340" y="186" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#6B7280">
+      ChatBot Component | FAQ Pages
+    </text>
+    <text x="340" y="200" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#9CA3AF">
+      Port: 3000 | ReactMarkdown
+    </text>
+  </g>
+  
+  <!-- User Query Input -->
+  <g filter="url(#shadow)">
+    <rect x="550" y="145" width="500" height="60" rx="8" fill="white" stroke="#3B82F6" stroke-width="2"/>
+    <text x="800" y="168" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#1D4ED8">
+      User Query (Vietnamese)
+    </text>
+    <text x="800" y="186" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#6B7280" font-style="italic">
+      "Điều kiện thành lập công ty TNHH là gì?"
+    </text>
+    <text x="800" y="200" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#9CA3AF">
+      Model Selection: LegalBizAI / LegalBizAI Pro
+    </text>
+  </g>
+  
+  <!-- Model Selection -->
+  <g filter="url(#shadow)">
+    <rect x="1120" y="145" width="280" height="60" rx="8" fill="white" stroke="#3B82F6" stroke-width="2"/>
+    <text x="1260" y="168" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#1D4ED8">
+      Model Selector
+    </text>
+    <text x="1260" y="186" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#6B7280">
+      ⚡ LegalBizAI (GPT-OSS 20B)
+    </text>
+    <text x="1260" y="200" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#6B7280">
+      💎 LegalBizAI Pro (OpenAI)
+    </text>
+  </g>
+  
+  <!-- Arrow to Backend -->
+  <line x1="800" y1="220" x2="800" y2="270" stroke="#3B82F6" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <text x="830" y="250" font-family="Arial, sans-serif" font-size="11" fill="#3B82F6">HTTP/REST API</text>
+  
+  <!-- ========================================== -->
+  <!-- LAYER 2: BACKEND -->
+  <!-- ========================================== -->
+  <g filter="url(#shadowBig)">
+    <rect x="60" y="270" width="1480" height="150" rx="12" fill="url(#greenGrad)" opacity="0.1"/>
+    <rect x="60" y="270" width="1480" height="150" rx="12" fill="none" stroke="url(#greenGrad)" stroke-width="3"/>
+  </g>
+  <text x="80" y="300" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#059669">
+    BACKEND API LAYER
+  </text>
+  
+  <!-- FastAPI Main Server -->
+  <g filter="url(#shadow)">
+    <rect x="100" y="315" width="300" height="90" rx="8" fill="white" stroke="#10B981" stroke-width="2"/>
+    <text x="250" y="340" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#059669">
+      FastAPI Main Server
+    </text>
+    <text x="250" y="358" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#6B7280">
+      backend/main.py
+    </text>
+    <text x="250" y="373" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9CA3AF">
+      Port: 1142 | CORS Enabled
+    </text>
+    <text x="250" y="387" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9CA3AF">
+      Request Routing &amp; Orchestration
+    </text>
+    <text x="250" y="400" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#10B981">
+      /stream endpoint
+    </text>
+  </g>
+  
+  <!-- Utils Module -->
+  <g filter="url(#shadow)">
+    <rect x="440" y="315" width="280" height="90" rx="8" fill="white" stroke="#10B981" stroke-width="2"/>
+    <text x="580" y="340" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#059669">
+      Utils Module
+    </text>
+    <text x="580" y="358" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#6B7280">
+      RetrieveContent Class
+    </text>
+    <text x="580" y="373" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9CA3AF">
+      get_prompt() | get_true_references()
+    </text>
+    <text x="580" y="387" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9CA3AF">
+      Prompt Template v2
+    </text>
+    <text x="580" y="400" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#10B981">
+      Reference Processing &amp; Validation
+    </text>
+  </g>
+  
+  <!-- Retrieval Module -->
+  <g filter="url(#shadow)">
+    <rect x="760" y="315" width="280" height="90" rx="8" fill="white" stroke="#10B981" stroke-width="2"/>
+    <text x="900" y="340" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#059669">
+      Retrieval Module
+    </text>
+    <text x="900" y="358" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#6B7280">
+      retrieval/retrieve.py
+    </text>
+    <text x="900" y="373" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9CA3AF">
+      retrieve() function
+    </text>
+    <text x="900" y="387" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9CA3AF">
+      FAISS Index + Embedding Model
+    </text>
+    <text x="900" y="400" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#10B981">
+      Startup: Auto-load model &amp; index
+    </text>
+  </g>
+  
+  <!-- Middleware & Config -->
+  <g filter="url(#shadow)">
+    <rect x="1080" y="315" width="280" height="90" rx="8" fill="white" stroke="#10B981" stroke-width="2"/>
+    <text x="1220" y="340" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#059669">
+      Middleware &amp; Config
+    </text>
+    <text x="1220" y="358" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#6B7280">
+      CORS | Logging | Error Handling
+    </text>
+    <text x="1220" y="373" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9CA3AF">
+      Environment Variables:
+    </text>
+    <text x="1220" y="387" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#9CA3AF">
+      GPT_OSS_SERVER_URL
+    </text>
+    <text x="1220" y="400" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#9CA3AF">
+      OPENAI_API_KEY, OPENAI_MODEL
+    </text>
+  </g>
+  
+  <!-- Arrow to Model Selection -->
+  <line x1="400" y1="420" x2="400" y2="480" stroke="#10B981" stroke-width="3" marker-end="url(#arrowGreen)"/>
+  <text x="420" y="455" font-family="Arial, sans-serif" font-size="11" fill="#10B981">LegalBizAI</text>
+  
+  <line x1="1100" y1="420" x2="1100" y2="480" stroke="#10B981" stroke-width="3" marker-end="url(#arrowGreen)"/>
+  <text x="1120" y="455" font-family="Arial, sans-serif" font-size="11" fill="#10B981">LegalBizAI Pro</text>
+  
+  <!-- ========================================== -->
+  <!-- LAYER 3A: LegalBizAI (GPT-OSS 20B) Path -->
+  <!-- ========================================== -->
+  <g filter="url(#shadowBig)">
+    <rect x="60" y="480" width="680" height="160" rx="12" fill="url(#purpleGrad)" opacity="0.1"/>
+    <rect x="60" y="480" width="680" height="160" rx="12" fill="none" stroke="url(#purpleGrad)" stroke-width="3"/>
+  </g>
+  <text x="80" y="510" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#6D28D9">
+    ⚡ LegalBizAI Path (Open-Source)
+  </text>
+  
+  <!-- GPT-OSS Server -->
+  <g filter="url(#shadow)">
+    <rect x="100" y="525" width="300" height="100" rx="8" fill="white" stroke="#8B5CF6" stroke-width="2"/>
+    <text x="250" y="550" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#6D28D9">
+      GPT-OSS 20B Server
+    </text>
+    <text x="250" y="568" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#6B7280">
+      fastapi_server.py
+    </text>
+    <text x="250" y="583" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9CA3AF">
+      Port: 1143 | /api/generate
+    </text>
+    <text x="250" y="597" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9CA3AF">
+      Model: legalbizai-gpt-oss
+    </text>
+    <text x="250" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9CA3AF">
+      Timeout: 120s
+    </text>
+    <text x="250" y="621" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#8B5CF6">
+      GPU: RTX 5060 Ti 16GB
+    </text>
+  </g>
+  
+  <!-- Model Details -->
+  <g filter="url(#shadow)">
+    <rect x="420" y="525" width="300" height="100" rx="8" fill="white" stroke="#8B5CF6" stroke-width="2"/>
+    <text x="570" y="550" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#6D28D9">
+      GPT-OSS 20B Model
+    </text>
+    <text x="570" y="567" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">
+      20.9B params | 4-bit NF4 Quantization
+    </text>
+    <text x="570" y="581" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9CA3AF">
+      Context: 131K tokens | MoE: 32 experts
+    </text>
+    <text x="570" y="595" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9CA3AF">
+      Fine-tuned: 3,175 steps (5 epochs)
+    </text>
+    <text x="570" y="609" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#10B981">
+      Loss: 12.92 → 0.26 (98% ↓)
+    </text>
+    <text x="570" y="621" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#9CA3AF">
+      LoRA r=8, α=16 | 2,539 Q&amp;A pairs
+    </text>
+  </g>
+  
+  <!-- ========================================== -->
+  <!-- LAYER 3B: LegalBizAI Pro (OpenAI) Path -->
+  <!-- ========================================== -->
+  <g filter="url(#shadowBig)">
+    <rect x="860" y="480" width="680" height="160" rx="12" fill="url(#tealGrad)" opacity="0.1"/>
+    <rect x="860" y="480" width="680" height="160" rx="12" fill="none" stroke="url(#tealGrad)" stroke-width="3"/>
+  </g>
+  <text x="880" y="510" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#0D9488">
+    💎 LegalBizAI Pro Path (Premium)
+  </text>
+  
+  <!-- OpenAI API -->
+  <g filter="url(#shadow)">
+    <rect x="900" y="525" width="300" height="100" rx="8" fill="white" stroke="#14B8A6" stroke-width="2"/>
+    <text x="1050" y="550" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#0D9488">
+      OpenAI API
+    </text>
+    <text x="1050" y="568" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#6B7280">
+      api.openai.com/v1/chat/completions
+    </text>
+    <text x="1050" y="583" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9CA3AF">
+      Model: gpt-4o-mini
+    </text>
+    <text x="1050" y="597" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9CA3AF">
+      Temperature: 0.7 | Max Tokens: 2000
+    </text>
+    <text x="1050" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9CA3AF">
+      Timeout: 60s
+    </text>
+    <text x="1050" y="621" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#14B8A6">
+      External Cloud Service
+    </text>
+  </g>
+  
+  <!-- OpenAI Config -->
+  <g filter="url(#shadow)">
+    <rect x="1220" y="525" width="300" height="100" rx="8" fill="white" stroke="#14B8A6" stroke-width="2"/>
+    <text x="1370" y="550" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#0D9488">
+      Configuration
+    </text>
+    <text x="1370" y="567" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">
+      Authorization: Bearer Token
+    </text>
+    <text x="1370" y="581" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9CA3AF">
+      OPENAI_API_KEY (env var)
+    </text>
+    <text x="1370" y="595" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9CA3AF">
+      OPENAI_MODEL override support
+    </text>
+    <text x="1370" y="609" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#DC2626">
+      Error: Returns message if key missing
+    </text>
+    <text x="1370" y="621" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#9CA3AF">
+      HTTPError handling
+    </text>
+  </g>
+  
+  <!-- Arrows to RAG -->
+  <line x1="400" y1="640" x2="400" y2="700" stroke="#8B5CF6" stroke-width="3" marker-end="url(#arrowPurple)"/>
+  <line x1="1100" y1="640" x2="1100" y2="700" stroke="#14B8A6" stroke-width="3" marker-end="url(#arrowhead)"/>
+  <text x="280" y="675" font-family="Arial, sans-serif" font-size="11" fill="#8B5CF6">Uses RAG Context</text>
+  <text x="950" y="675" font-family="Arial, sans-serif" font-size="11" fill="#14B8A6">Uses RAG Context</text>
+  
+  <!-- ========================================== -->
+  <!-- LAYER 4: RAG (Retrieval-Augmented Generation) -->
+  <!-- ========================================== -->
+  <g filter="url(#shadowBig)">
+    <rect x="60" y="700" width="1480" height="280" rx="12" fill="url(#orangeGrad)" opacity="0.08"/>
+    <rect x="60" y="700" width="1480" height="280" rx="12" fill="none" stroke="url(#orangeGrad)" stroke-width="3"/>
+  </g>
+  <text x="80" y="730" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#D97706">
+    RAG LAYER - Retrieval-Augmented Generation
+  </text>
+  
+  <!-- Embedding Models -->
+  <g filter="url(#shadow)">
+    <rect x="100" y="745" width="350" height="220" rx="8" fill="white" stroke="#F59E0B" stroke-width="2"/>
+    <text x="275" y="770" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#D97706">
+      Embedding Models
+    </text>
+    <text x="275" y="788" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#10B981">
+      ✓ BAAI BGE-M3 (Selected)
+    </text>
+    <text x="275" y="805" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">
+      1024-dim | Multilingual | Fine-tuned
+    </text>
+    <text x="275" y="819" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#10B981">
+      Recall@3: 93.17% | MRR@3: 0.8056
+    </text>
+    <text x="275" y="833" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#10B981">
+      nDCG@3: 0.8382 | Precision: 31.06%
+    </text>
+    
+    <line x1="110" y1="845" x2="440" y2="845" stroke="#E5E7EB" stroke-width="1"/>
+    
+    <text x="275" y="862" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#6B7280">
+      Alternatives Tested:
+    </text>
+    <text x="275" y="877" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#9CA3AF">
+      Google Gemma 300M: Recall@3 85.53%
+    </text>
+    <text x="275" y="890" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#9CA3AF">
+      All-MiniLM-L6-v2: Recall@3 66.31%
+    </text>
+    
+    <line x1="110" y1="900" x2="440" y2="900" stroke="#E5E7EB" stroke-width="1"/>
+    
+    <text x="275" y="917" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#D97706">
+      Fine-tuning: LoRA
+    </text>
+    <text x="275" y="932" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#9CA3AF">
+      30 epochs | MultipleNegativesRankingLoss
+    </text>
+    <text x="275" y="945" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#9CA3AF">
+      r=8-16, α=16-32 | LR: 1e-5 – 2e-5
+    </text>
+    <text x="275" y="958" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#9CA3AF">
+      AdamW optimizer | FP16/BF16
+    </text>
+  </g>
+  
+  <!-- FAISS Vector Database -->
+  <g filter="url(#shadow)">
+    <rect x="480" y="745" width="340" height="220" rx="8" fill="white" stroke="#F59E0B" stroke-width="2"/>
+    <text x="650" y="770" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#D97706">
+      FAISS Vector Database
+    </text>
+    <text x="650" y="790" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#6B7280">
+      Dense Vector Search
+    </text>
+    <text x="650" y="807" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9CA3AF">
+      Top-K Retrieval (K = 3, 5, 10)
+    </text>
+    <text x="650" y="822" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9CA3AF">
+      Cosine Similarity Ranking
+    </text>
+    
+    <line x1="490" y1="835" x2="810" y2="835" stroke="#E5E7EB" stroke-width="1"/>
+    
+    <text x="650" y="853" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#D97706">
+      Retrieval Process:
+    </text>
+    <text x="650" y="869" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6B7280">
+      1. Query → Embedding Model
+    </text>
+    <text x="650" y="883" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6B7280">
+      2. Vector Search in FAISS Index
+    </text>
+    <text x="650" y="897" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6B7280">
+      3. Rank by Similarity Score
+    </text>
+    <text x="650" y="911" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6B7280">
+      4. Return Top-K Contexts
+    </text>
+    
+    <line x1="490" y1="923" x2="810" y2="923" stroke="#E5E7EB" stroke-width="1"/>
+    
+    <text x="650" y="940" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#059669">
+      Performance:
+    </text>
+    <text x="650" y="955" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#10B981">
+      Latency: &lt; 1s | Scalable to millions
+    </text>
+  </g>
+  
+  <!-- Legal Knowledge Base -->
+  <g filter="url(#shadow)">
+    <rect x="850" y="745" width="670" height="220" rx="8" fill="white" stroke="#DC2626" stroke-width="2"/>
+    <text x="1185" y="770" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#DC2626">
+      Legal Knowledge Base
+    </text>
+    <text x="1185" y="790" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#111827">
+      Luật Doanh nghiệp 2020 (Enterprise Law)
+    </text>
+    <text x="1185" y="808" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#6B7280">
+      + 8 Related Decrees (NĐ-CP 01, 122, 47, etc.)
+    </text>
+    
+    <line x1="860" y1="820" x2="1510" y2="820" stroke="#E5E7EB" stroke-width="1"/>
+    
+    <text x="1185" y="838" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#DC2626">
+      Dataset Statistics:
+    </text>
+    <text x="1185" y="854" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">
+      📄 334 Legal Articles
+    </text>
+    <text x="1185" y="869" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">
+      🧩 2,042 Text Chunks (Clause-based)
+    </text>
+    <text x="1185" y="884" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">
+      ❓ 5,561 Q&amp;A Pairs (80% train, 20% test)
+    </text>
+    
+    <line x1="860" y1="895" x2="1510" y2="895" stroke="#E5E7EB" stroke-width="1"/>
+    
+    <text x="1185" y="912" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#D97706">
+      Data Preprocessing:
+    </text>
+    <text x="1185" y="927" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#9CA3AF">
+      ✓ Validity verification against official sources
+    </text>
+    <text x="1185" y="940" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#9CA3AF">
+      ✓ Removal of metadata, headers, signatures
+    </text>
+    <text x="1185" y="953" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#9CA3AF">
+      ✓ De-duplication &amp; consistency checking
+    </text>
+    <text x="1185" y="965" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#10B981">
+      Best chunking: Clause-based (Recall=87.9%, F1β=0.80)
+    </text>
+  </g>
+  
+  <!-- Arrow to LLM -->
+  <line x1="800" y1="980" x2="800" y2="1040" stroke="#F59E0B" stroke-width="3" marker-end="url(#arrowOrange)"/>
+  <text x="830" y="1015" font-family="Arial, sans-serif" font-size="11" fill="#F59E0B">Top-K Contexts + Query</text>
+  
+  <!-- ========================================== -->
+  <!-- LAYER 5: LLM GENERATION -->
+  <!-- ========================================== -->
+  <g filter="url(#shadowBig)">
+    <rect x="60" y="1040" width="1480" height="200" rx="12" fill="url(#purpleGrad)" opacity="0.08"/>
+    <rect x="60" y="1040" width="1480" height="200" rx="12" fill="none" stroke="url(#purpleGrad)" stroke-width="3"/>
+  </g>
+  <text x="80" y="1070" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#6D28D9">
+    LLM GENERATION LAYER
+  </text>
+  
+  <!-- Generation Process -->
+  <g filter="url(#shadow)">
+    <rect x="100" y="1085" width="700" height="140" rx="8" fill="white" stroke="#8B5CF6" stroke-width="2"/>
+    <text x="450" y="1110" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#6D28D9">
+      Answer Generation with Context Grounding
+    </text>
+    <text x="450" y="1130" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#6B7280">
+      GPT-OSS Harmony Format: System + User + Assistant (analysis + final)
+    </text>
+    
+    <line x1="110" y1="1142" x2="790" y2="1142" stroke="#E5E7EB" stroke-width="1"/>
+    
+    <text x="450" y="1160" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#6D28D9">
+      Generation Flow:
+    </text>
+    <text x="450" y="1176" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">
+      1. Prompt Template v2 construction (System instructions + Retrieved context + Query)
+    </text>
+    <text x="450" y="1191" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">
+      2. LLM generates reasoning (analysis) + final answer
+    </text>
+    <text x="450" y="1206" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">
+      3. Reference validation &amp; citation extraction
+    </text>
+    <text x="450" y="1220" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#10B981">
+      ✓ Citation-grounded | ✓ Hallucination reduced | ✓ Legal accuracy ensured
+    </text>
+  </g>
+  
+  <!-- Quality Metrics -->
+  <g filter="url(#shadow)">
+    <rect x="840" y="1085" width="680" height="140" rx="8" fill="white" stroke="#8B5CF6" stroke-width="2"/>
+    <text x="1180" y="1110" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#6D28D9">
+      Generation Quality Metrics
+    </text>
+    
+    <text x="1180" y="1133" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#059669">
+      Target Performance:
+    </text>
+    <text x="1180" y="1149" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">
+      ✓ Faithfulness: ≥ 90% (context consistency) | ✓ Context Precision: ≥ 85%
+    </text>
+    <text x="1180" y="1164" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">
+      ✓ Maliciousness: ≤ 1% | ✓ ROUGE-L / BLEU: ≥ 0.8
+    </text>
+    <text x="1180" y="1179" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">
+      ✓ Human Eval: ≥ 4/5 (correctness/clarity)
+    </text>
+    <text x="1180" y="1194" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#10B981">
+      ✓ Latency: 3–4 seconds (Target: &lt; 5s)
+    </text>
+    
+    <text x="1180" y="1213" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#8B5CF6">
+      End-to-end RAG pipeline meets all target metrics
+    </text>
+  </g>
+  
+  <!-- Arrow to Output -->
+  <line x1="800" y1="1240" x2="800" y2="1290" stroke="#8B5CF6" stroke-width="3" marker-end="url(#arrowPurple)"/>
+  
+  <!-- ========================================== -->
+  <!-- FINAL OUTPUT -->
+  <!-- ========================================== -->
+  <g filter="url(#shadowBig)">
+    <rect x="200" y="1290" width="1200" height="75" rx="12" fill="url(#greenGrad)"/>
+  </g>
+  <text x="800" y="1318" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white">
+    Final Answer with Legal Citation
+  </text>
+  <text x="800" y="1340" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="white" opacity="0.95">
+    "Theo Điều 11 Luật Doanh nghiệp 2020, điều kiện thành lập công ty TNHH bao gồm..."
+  </text>
+  <text x="800" y="1358" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white" opacity="0.85">
+    [References: Điều 11, Điều 24 - Luật Doanh nghiệp 2020 | NĐ-CP 01/2021]
+  </text>
+  
+  <!-- Footer -->
+  <text x="800" y="1390" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9CA3AF">
+    © 2025 LegalBizAI | FPT University | Group 4 - DSP391m | Capstone Project
+  </text>
+</svg>

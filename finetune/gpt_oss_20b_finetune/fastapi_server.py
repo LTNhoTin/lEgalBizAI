@@ -285,7 +285,117 @@ class GenerateRequest(BaseModel):
 
 class GenerateResponse(BaseModel):
     response: str
+    response_markdown: str  # Formatted markdown version
     model: str = "gpt-oss-20b-finetuned"
+
+# ============================================
+# UTILITY FUNCTIONS
+# ============================================
+def clean_reasoning_tokens(text: str) -> str:
+    """
+    Loại bỏ các token reasoning của GPT-OSS Harmony (analysis, final, etc.)
+    và chỉ giữ phần content cuối cùng
+    """
+    import re
+    
+    # GPT-OSS Harmony có format: analysis...final...
+    # Chúng ta chỉ muốn giữ phần sau "final"
+    
+    # Tìm vị trí của "final" (case-insensitive)
+    final_match = re.search(r'\bfinal\b', text, re.IGNORECASE)
+    
+    if final_match:
+        # Lấy text sau "final"
+        text = text[final_match.end():].strip()
+    
+    # Loại bỏ "analysis" nếu còn
+    text = re.sub(r'\banalysis\b.*?(?=\n|$)', '', text, flags=re.IGNORECASE)
+    
+    return text.strip()
+
+
+def format_response_to_markdown(text: str) -> str:
+    """
+    Format response text thành markdown đẹp hơn
+    - Loại bỏ reasoning tokens (analysis, final)
+    - Format điều luật, khoản, điểm
+    - Format bullet points
+    - Highlight text in đậm
+    """
+    import re
+    
+    # Bước 1: Loại bỏ reasoning tokens
+    text = clean_reasoning_tokens(text)
+    
+    # Bước 2: Format markdown
+    
+    # Format "Theo quy định tại..." thành header
+    text = re.sub(
+        r'^(Theo quy định tại [^:]+:)',
+        r'**\1**\n',
+        text,
+        flags=re.MULTILINE
+    )
+    
+    # Format điều luật: "Điều XX" -> "### Điều XX"
+    text = re.sub(
+        r'\b(Điều\s+\d+[^\n]*?)(?=\n|$)',
+        r'### \1',
+        text,
+        flags=re.MULTILINE
+    )
+    
+    # Format khoản: "khoản X" -> "**khoản X**"
+    text = re.sub(
+        r'\b(khoản\s+\d+)',
+        r'**\1**',
+        text,
+        flags=re.IGNORECASE
+    )
+    
+    # Format các điểm a, b, c thành bullet list
+    # Tìm các dòng bắt đầu bằng "- " và giữ nguyên
+    # Tìm các dòng không có "- " nhưng là list items và thêm markdown
+    lines = text.split('\n')
+    formatted_lines = []
+    in_list = False
+    
+    for line in lines:
+        stripped = line.strip()
+        
+        # Nếu dòng đã bắt đầu bằng "- ", giữ nguyên và mark là in_list
+        if stripped.startswith('- '):
+            in_list = True
+            # Format điểm a), b), c) trong list
+            if re.match(r'^- ([a-z]\))', stripped):
+                formatted_lines.append(re.sub(r'^- ([a-z]\))', r'- **\1**', stripped))
+            else:
+                formatted_lines.append(stripped)
+        # Nếu dòng trống, kết thúc list
+        elif not stripped:
+            in_list = False
+            formatted_lines.append('')
+        # Nếu trong list và dòng tiếp tục (indent hoặc continuation)
+        elif in_list and (line.startswith('  ') or not re.match(r'^[A-Z]', stripped)):
+            formatted_lines.append('  ' + stripped)
+        # Dòng bình thường
+        else:
+            in_list = False
+            formatted_lines.append(stripped)
+    
+    text = '\n'.join(formatted_lines)
+    
+    # Format tên luật in đậm: "Luật Doanh nghiệp 2020" -> "**Luật Doanh nghiệp 2020**"
+    text = re.sub(
+        r'\b(Luật\s+[A-Za-zÀ-ỹ\s]+\d{4})',
+        r'**\1**',
+        text
+    )
+    
+    # Cleanup: remove multiple blank lines
+    text = re.sub(r'\n\n+', '\n\n', text)
+    
+    return text.strip()
 
 # ============================================
 # ENDPOINTS
@@ -377,7 +487,13 @@ async def generate(request: GenerateRequest):
         
         logger.info(f"Generated {len(generated_text)} characters")
         
-        return GenerateResponse(response=generated_text)
+        # Format response thành markdown
+        markdown_response = format_response_to_markdown(generated_text)
+        
+        return GenerateResponse(
+            response=generated_text,
+            response_markdown=markdown_response
+        )
         
     except Exception as e:
         logger.error(f"Lỗi khi generate: {e}")
@@ -426,7 +542,13 @@ async def chat(request: GenerateRequest):
             skip_special_tokens=True
         )
         
-        return GenerateResponse(response=generated_text)
+        # Format response thành markdown
+        markdown_response = format_response_to_markdown(generated_text)
+        
+        return GenerateResponse(
+            response=generated_text,
+            response_markdown=markdown_response
+        )
         
     except Exception as e:
         logger.error(f"Lỗi khi chat: {e}")
