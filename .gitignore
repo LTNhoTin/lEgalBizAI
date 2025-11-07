@@ -35,6 +35,8 @@ MANIFEST
 *.pkl
 *.bin
 *.safetensors
+# Exception: Allow finetuned GPT-OSS 20B model (LoRA adapter only, ~16MB)
+!finetune/gpt_oss_20b_finetune/finetuned_model/**/*.safetensors
 *.h5
 *.ckpt
 *.pth
@@ -54,12 +56,27 @@ model/
 checkpoints/
 checkpoint/
 checkpoint-*/
+# Exception: Allow GPT-OSS 20B finetune checkpoints
+!finetune/gpt_oss_20b_finetune/outputs/checkpoint-*/
 output/
 outputs/
 saved_models/
 pretrained_models/
 fine_tuned_models/
 final_model/
+# Exception: Allow finetuned GPT-OSS 20B model directory
+!finetune/gpt_oss_20b_finetune/finetuned_model/
+!finetune/gpt_oss_20b_finetune/finetuned_model/**/*.json
+!finetune/gpt_oss_20b_finetune/finetuned_model/**/*.md
+!finetune/gpt_oss_20b_finetune/TRAINING_LOG_CHI_TIET.txt
+# Exception: Allow GPT-OSS 20B finetune checkpoints and outputs
+!finetune/gpt_oss_20b_finetune/outputs/
+!finetune/gpt_oss_20b_finetune/outputs/**/*.safetensors
+!finetune/gpt_oss_20b_finetune/outputs/**/*.pt
+!finetune/gpt_oss_20b_finetune/outputs/**/*.pth
+!finetune/gpt_oss_20b_finetune/outputs/**/*.bin
+!finetune/gpt_oss_20b_finetune/outputs/**/*.json
+!finetune/gpt_oss_20b_finetune/outputs/**/*.md
 
 # Embedding Model Specific - Ignore outputs, checkpoints, but allow source code
 finetune/embedding_models/*/output/
