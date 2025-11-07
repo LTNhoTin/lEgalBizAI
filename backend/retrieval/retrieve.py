@@ -1,17 +1,82 @@
 import os
 from sentence_transformers import SentenceTransformer
+from transformers import AutoModel, AutoTokenizer
+from peft import PeftModel
 
-# Đường dẫn tới thư mục chứa mô hình
-model_path = "./model/embedding"
+# Đường dẫn tới thư mục chứa mô hình finetuned
+model_path = "/home/nhotin/work/LegalBizAI_project/finetune/embedding_models/baai_bge_m3/output/bge_m3/best_model"
+base_model_name = "BAAI/bge-m3"
 
 # Kiểm tra nếu mô hình đã tồn tại trong thư mục cục bộ
 if not os.path.exists(model_path):
-    print("Mô hình chưa tồn tại trong thư mục cục bộ. Đang tải về...")
-    model = SentenceTransformer('BAAI/bge-m3')
-    model.save(model_path)
+    print(f"Mô hình finetuned chưa tồn tại tại {model_path}. Đang tải model gốc BAAI/bge-m3...")
+    model = SentenceTransformer(base_model_name)
 else:
-    print("Mô hình đã tồn tại trong thư mục cục bộ. Đang tải mô hình từ thư mục...")
-    model = SentenceTransformer(model_path)
+    # Kiểm tra xem có adapter (LoRA) không
+    adapter_config_path = os.path.join(model_path, "adapter_config.json")
+    
+    if os.path.exists(adapter_config_path):
+        # Model có LoRA adapter, cần load base model + adapter rồi merge
+        print(f"Phát hiện LoRA adapter tại {model_path}")
+        print("Đang load base model và merge với LoRA adapter...")
+        
+        try:
+            merged_model_dir = os.path.join(model_path, "merged_model")
+            
+            if not os.path.exists(merged_model_dir) or not os.path.exists(os.path.join(merged_model_dir, "modules.json")):
+                # Chưa có merged model, cần merge và save
+                print("Đang merge LoRA adapter vào base model...")
+                
+                # Load base model
+                base_model = AutoModel.from_pretrained(base_model_name, trust_remote_code=True)
+                tokenizer = AutoTokenizer.from_pretrained(model_path)  # Load tokenizer từ best_model
+                
+                # Load và merge LoRA adapter
+                model_with_adapter = PeftModel.from_pretrained(base_model, model_path)
+                merged_model = model_with_adapter.merge_and_unload()
+                
+                # Save merged model
+                print(f"Đang save merged model vào {merged_model_dir}...")
+                merged_model.save_pretrained(merged_model_dir)
+                tokenizer.save_pretrained(merged_model_dir)
+                
+                # Tạo modules.json cho SentenceTransformer (cấu trúc đúng)
+                import json
+                # SentenceTransformer modules.json format
+                modules_config = [
+                    {
+                        "idx": 0,
+                        "name": "0",
+                        "path": ".",
+                        "type": "transformers.AutoModel"
+                    }
+                ]
+                with open(os.path.join(merged_model_dir, "modules.json"), "w") as f:
+                    json.dump(modules_config, f, indent=2)
+                
+                print("✓ Đã merge và save model thành công!")
+            else:
+                print(f"Đã có merged model tại {merged_model_dir}, đang load...")
+            
+            # Load với SentenceTransformer
+            model = SentenceTransformer(merged_model_dir)
+            print("✓ Đã load model với LoRA adapter thành công!")
+            
+        except Exception as e:
+            print(f"⚠ Lỗi khi load model với adapter: {e}")
+            import traceback
+            traceback.print_exc()
+            print("Fallback: Sử dụng model gốc BAAI/bge-m3...")
+            model = SentenceTransformer(base_model_name)
+    else:
+        # Model không có LoRA, load trực tiếp
+        print(f"Đang tải mô hình finetuned từ {model_path}...")
+        try:
+            model = SentenceTransformer(model_path)
+        except Exception as e:
+            print(f"⚠ Lỗi khi load model từ {model_path}: {e}")
+            print("Fallback: Sử dụng model gốc BAAI/bge-m3...")
+            model = SentenceTransformer(base_model_name)
 
 # Kiểm tra mô hình
 print(model)
