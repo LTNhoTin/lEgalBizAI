@@ -9,7 +9,7 @@ __pycache__/
 *.pyd
 .Python
 
-# Model files and checkpoints
+# Model files and checkpoints (too large for git)
 *.safetensors
 *.pt
 *.bin
@@ -17,6 +17,7 @@ __pycache__/
 *.pth
 checkpoint-*/
 outputs/
+output/
 finetuned_model/
 final_model/
 best_model/
