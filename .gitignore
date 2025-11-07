@@ -15,3 +15,16 @@ __pycache__/
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Model training files
+**/wandb/
+**/runs/
+*.log
+**/checkpoint-*/
+**/best_model/
+**/final_model/
+**/merged_model/
+**/*_compiled_cache/
+*.safetensors
+**/output/*/model.safetensors
+.ipynb_checkpoints/
