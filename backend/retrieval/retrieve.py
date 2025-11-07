@@ -1,7 +1,12 @@
 import os
+import torch
 from sentence_transformers import SentenceTransformer
 from transformers import AutoModel, AutoTokenizer
 from peft import PeftModel
+
+# Đảm bảo chạy trên CPU
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
+torch.set_num_threads(4)  # Giới hạn số threads để tránh quá tải CPU
 
 # Đường dẫn tới thư mục chứa mô hình finetuned
 model_path = "/home/nhotin/work/LegalBizAI_project/finetune/embedding_models/baai_bge_m3/output/bge_m3/best_model"
@@ -10,7 +15,8 @@ base_model_name = "BAAI/bge-m3"
 # Kiểm tra nếu mô hình đã tồn tại trong thư mục cục bộ
 if not os.path.exists(model_path):
     print(f"Mô hình finetuned chưa tồn tại tại {model_path}. Đang tải model gốc BAAI/bge-m3...")
-    model = SentenceTransformer(base_model_name)
+    print("⚠ Đảm bảo chạy trên CPU...")
+    model = SentenceTransformer(base_model_name, device="cpu")
 else:
     # Kiểm tra xem có adapter (LoRA) không
     adapter_config_path = os.path.join(model_path, "adapter_config.json")
@@ -26,18 +32,35 @@ else:
             if not os.path.exists(merged_model_dir) or not os.path.exists(os.path.join(merged_model_dir, "modules.json")):
                 # Chưa có merged model, cần merge và save
                 print("Đang merge LoRA adapter vào base model...")
+                print("⚠ Đảm bảo chạy trên CPU...")
                 
-                # Load base model
-                base_model = AutoModel.from_pretrained(base_model_name, trust_remote_code=True)
+                # Load base model trên CPU với safetensors (nếu có)
+                try:
+                    base_model = AutoModel.from_pretrained(
+                        base_model_name, 
+                        trust_remote_code=True,
+                        torch_dtype=torch.float32,  # Sử dụng float32 cho CPU
+                        device_map="cpu",
+                        use_safetensors=True  # Ưu tiên safetensors để tránh lỗi PyTorch version
+                    )
+                except Exception as e:
+                    # Fallback nếu không có safetensors
+                    print(f"⚠ Không thể load với safetensors: {e}. Thử load không safetensors...")
+                    base_model = AutoModel.from_pretrained(
+                        base_model_name, 
+                        trust_remote_code=True,
+                        torch_dtype=torch.float32,
+                        device_map="cpu"
+                    )
                 tokenizer = AutoTokenizer.from_pretrained(model_path)  # Load tokenizer từ best_model
                 
                 # Load và merge LoRA adapter
                 model_with_adapter = PeftModel.from_pretrained(base_model, model_path)
                 merged_model = model_with_adapter.merge_and_unload()
                 
-                # Save merged model
+                # Save merged model với safetensors
                 print(f"Đang save merged model vào {merged_model_dir}...")
-                merged_model.save_pretrained(merged_model_dir)
+                merged_model.save_pretrained(merged_model_dir, safe_serialization=True)
                 tokenizer.save_pretrained(merged_model_dir)
                 
                 # Tạo modules.json cho SentenceTransformer (cấu trúc đúng)
@@ -57,29 +80,112 @@ else:
                 print("✓ Đã merge và save model thành công!")
             else:
                 print(f"Đã có merged model tại {merged_model_dir}, đang load...")
+                # Kiểm tra xem có safetensors files không
+                import glob
+                safetensors_files = glob.glob(os.path.join(merged_model_dir, "*.safetensors"))
+                if not safetensors_files:
+                    print("⚠ Merged model không có safetensors files. Có thể gặp lỗi PyTorch version.")
+                    print("   Đề xuất: Xóa merged_model và merge lại để tạo safetensors files.")
             
-            # Load với SentenceTransformer
-            model = SentenceTransformer(merged_model_dir)
-            print("✓ Đã load model với LoRA adapter thành công!")
+            # Load với SentenceTransformer trên CPU
+            print("⚠ Đảm bảo chạy trên CPU...")
+            try:
+                # Thử load bằng SentenceTransformer trước
+                model = SentenceTransformer(merged_model_dir, device="cpu")
+                print("✓ Đã load model với LoRA adapter thành công!")
+            except (ValueError, AttributeError, Exception) as e:
+                # Nếu không load được bằng SentenceTransformer, load trực tiếp bằng AutoModel
+                print(f"⚠ Không thể load bằng SentenceTransformer: {e}")
+                print("Đang load trực tiếp bằng AutoModel...")
+                try:
+                    # Load merged model trực tiếp
+                    merged_model = AutoModel.from_pretrained(
+                        merged_model_dir,
+                        trust_remote_code=True,
+                        torch_dtype=torch.float32,
+                        device_map="cpu"
+                    )
+                    merged_tokenizer = AutoTokenizer.from_pretrained(merged_model_dir)
+                    
+                    # Tạo wrapper để tương thích với SentenceTransformer API
+                    class ModelWrapper:
+                        def __init__(self, model, tokenizer):
+                            self.model = model
+                            self.tokenizer = tokenizer
+                            self._modules = {'0': model}
+                        
+                        def encode(self, texts, **kwargs):
+                            is_single = isinstance(texts, str)
+                            if is_single:
+                                texts = [texts]
+                            
+                            # Tokenize và encode
+                            encoded = self.tokenizer(
+                                texts,
+                                padding=True,
+                                truncation=True,
+                                max_length=512,
+                                return_tensors="pt"
+                            )
+                            
+                            with torch.no_grad():
+                                outputs = self.model(**encoded)
+                                # BGE-M3 sử dụng dense embeddings
+                                if hasattr(outputs, 'dense_embeds'):
+                                    embeddings = outputs.dense_embeds
+                                elif hasattr(outputs, 'last_hidden_state'):
+                                    # Mean pooling
+                                    embeddings = outputs.last_hidden_state.mean(dim=1)
+                                else:
+                                    embeddings = outputs[0].mean(dim=1)
+                                
+                                # Normalize
+                                embeddings = torch.nn.functional.normalize(embeddings, p=2, dim=1)
+                                
+                                result = embeddings.cpu().numpy()
+                                
+                                # Trả về 1D array nếu input là string đơn
+                                if is_single:
+                                    return result[0]
+                                return result
+                        
+                        def to(self, device):
+                            self.model = self.model.to(device)
+                            return self
+                    
+                    model = ModelWrapper(merged_model, merged_tokenizer)
+                    print("✓ Đã load model với LoRA adapter thành công (AutoModel wrapper)!")
+                except Exception as e2:
+                    print(f"⚠ Lỗi khi load merged model: {e2}")
+                    raise e
             
         except Exception as e:
             print(f"⚠ Lỗi khi load model với adapter: {e}")
             import traceback
             traceback.print_exc()
             print("Fallback: Sử dụng model gốc BAAI/bge-m3...")
-            model = SentenceTransformer(base_model_name)
+            print("⚠ Đảm bảo chạy trên CPU...")
+            model = SentenceTransformer(base_model_name, device="cpu")
     else:
         # Model không có LoRA, load trực tiếp
         print(f"Đang tải mô hình finetuned từ {model_path}...")
+        print("⚠ Đảm bảo chạy trên CPU...")
         try:
-            model = SentenceTransformer(model_path)
+            model = SentenceTransformer(model_path, device="cpu")
         except Exception as e:
             print(f"⚠ Lỗi khi load model từ {model_path}: {e}")
+            import traceback
+            traceback.print_exc()
             print("Fallback: Sử dụng model gốc BAAI/bge-m3...")
-            model = SentenceTransformer(base_model_name)
+            model = SentenceTransformer(base_model_name, device="cpu")
 
-# Kiểm tra mô hình
+# Kiểm tra mô hình và đảm bảo trên CPU
 print(model)
+if hasattr(model, '_modules'):
+    for module_name, module in model._modules.items():
+        if hasattr(module, 'to'):
+            module = module.to('cpu')
+print("✓ Model đã được đảm bảo chạy trên CPU")
 
 # Các hàm và biến khác
 import json
@@ -256,9 +362,22 @@ stop_words_vn = set(
     ]
 )
 
-index_path = "./data/faiss_index"
+# Lấy đường dẫn tuyệt đối của thư mục backend
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+index_path = os.path.join(BASE_DIR, "data", "faiss_index")
 
-faiss_index = faiss.read_index(index_path)
+try:
+    if os.path.exists(index_path):
+        faiss_index = faiss.read_index(index_path)
+        print(f"✓ Đã load faiss_index thành công từ {index_path}")
+    else:
+        faiss_index = None
+        import warnings
+        warnings.warn(f"⚠ File faiss_index không tồn tại tại {index_path}. Retrieval sẽ không hoạt động.")
+except (RuntimeError, FileNotFoundError, Exception) as e:
+    faiss_index = None
+    import warnings
+    warnings.warn(f"⚠ Không thể load faiss_index từ {index_path}: {e}. Retrieval sẽ không hoạt động.")
 
 
 def tokenizer(text):
@@ -281,6 +400,11 @@ def get_question_embedding(question):
     return get_embedding(question)
 
 def retrieve(ques, topk=3):
+    if faiss_index is None:
+        import warnings
+        warnings.warn("⚠ faiss_index chưa được load. Trả về empty list. Vui lòng kiểm tra file faiss_index.")
+        # Trả về empty list thay vì raise exception để không crash app
+        return []
     # Tokenize câu hỏi trước
     tokenized_ques = tokenizer(ques)
     # Encode câu hỏi đã tokenize

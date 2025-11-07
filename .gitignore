@@ -9,38 +9,9 @@ __pycache__/
 *.pyd
 .Python
 
-# Model files and checkpoints (too large for git)
-*.safetensors
-*.pt
-*.bin
-*.ckpt
-*.pth
-checkpoint-*/
-outputs/
-output/
-finetuned_model/
-final_model/
-best_model/
-merged_model/
-
-# Wandb logs
-wandb/
-**/wandb/
-
-# Training outputs and logs
-*.log
-logs/
-runs/
-
-# Jupyter checkpoints
-.ipynb_checkpoints/
-**/.ipynb_checkpoints/
-
-# Cache directories
-unsloth_compiled_cache/
-**/unsloth_compiled_cache/
-
-# Large data files (keep structure but not large binaries)
-*.csv
-!**/evaluation/*.csv
-!**/eval/*.csv
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

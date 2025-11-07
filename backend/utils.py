@@ -4,8 +4,13 @@ from retrieval.retrieve import retrieve
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from functools import wraps
+import os
 
-with open("./prompt_tempt_v2.txt", "r", encoding="utf-8") as f_template:
+# Get the directory where this file is located
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PROMPT_TEMPLATE_PATH = os.path.join(BASE_DIR, "prompt_tempt_v2.txt")
+
+with open(PROMPT_TEMPLATE_PATH, "r", encoding="utf-8") as f_template:
     PROMPT_TEMPLATE = f_template.read()
 
 def make_async(sync_func):
@@ -25,7 +30,8 @@ class ChunkLoader:
     def __getitem__(self, key):
         return self._data[key]
     
-chunk_data = ChunkLoader("./data/all_chunks_final.json")
+CHUNK_DATA_PATH = os.path.join(BASE_DIR, "data", "all_chunks_final.json")
+chunk_data = ChunkLoader(CHUNK_DATA_PATH)
 
 class RetrieveContent:
     def __init__(self, message):
@@ -79,7 +85,8 @@ def split_consecutive_groups(lst, chunk_data):
                 groups.append(current_group)
                 current_group = [each]
                 current_title = chunk_data[each]["title"]
-    groups.append(current_group)
+    if current_group:  # Only append if not empty
+        groups.append(current_group)
     return groups
 
 
