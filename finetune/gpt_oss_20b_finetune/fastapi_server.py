@@ -277,7 +277,7 @@ app.add_middleware(
 # ============================================
 class GenerateRequest(BaseModel):
     prompt: str
-    max_new_tokens: Optional[int] = 512
+    max_new_tokens: Optional[int] = 2048
     temperature: Optional[float] = 0.7
     top_p: Optional[float] = 0.95
     reasoning_effort: Optional[str] = "medium"  # "low", "medium", "high"

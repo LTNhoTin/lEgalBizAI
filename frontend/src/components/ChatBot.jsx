@@ -142,8 +142,7 @@ function ChatBot(props) {
 
     return (
         <div
-            className="bg-gradient-to-r from-orange-50 to-orange-100 flex flex-col"
-            style={{ height: '87vh' }}
+            className="bg-gradient-to-r from-orange-50 to-orange-100 flex flex-col w-full flex-grow"
         >
             <style>
             {`
