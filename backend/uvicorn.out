@@ -1,0 +1,31 @@
+nohup: ignoring input
+`torch_dtype` is deprecated! Use `dtype` instead!
+INFO:     Started server process [2877677]
+INFO:     Waiting for application startup.
+INFO:main:============================================================
+INFO:main:Starting LegalBizAI Chatbot Server
+INFO:main:============================================================
+INFO:main:✓ Retriever model và FAISS index đã được load thành công
+INFO:main:  - Embedding model: ModelWrapper
+INFO:main:  - FAISS index shape: 2042 vectors
+INFO:main:============================================================
+INFO:main:Configuration:
+INFO:main:  - LegalBizAI (Ollama GPT-OSS-20B): http://localhost:11434
+INFO:main:  - Ollama Model: gpt-oss:20b
+INFO:main:  - LegalBizAI Pro (Gemini): gemini-2.0-flash-exp
+INFO:main:  - Gemini API Key: ********************...gmlQ
+INFO:main:============================================================
+INFO:     Application startup complete.
+ERROR:    [Errno 98] error while attempting to bind on address ('0.0.0.0', 8000): address already in use
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+Phát hiện LoRA adapter tại /home/nhotin/work/LegalBizAI_project/finetune/embedding_models/baai_bge_m3/output/bge_m3/best_model
+Đang load base model và merge với LoRA adapter...
+Đã có merged model tại /home/nhotin/work/LegalBizAI_project/finetune/embedding_models/baai_bge_m3/output/bge_m3/best_model/merged_model, đang load...
+⚠ Đảm bảo chạy trên CPU...
+⚠ Không thể load bằng SentenceTransformer: type object 'AutoModel' has no attribute 'load'
+Đang load trực tiếp bằng AutoModel...
+✓ Đã load model với LoRA adapter thành công (AutoModel wrapper)!
+<retrieval.retrieve.ModelWrapper object at 0x7bfc788da8f0>
+✓ Model đã được đảm bảo chạy trên CPU
+✓ Đã load faiss_index thành công từ /home/nhotin/work/LegalBizAI_project/backend/data/faiss_index

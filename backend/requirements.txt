@@ -1,7 +1,7 @@
 async-timeout==4.0.3
 faiss-cpu==1.8.0
 fastapi==0.111.0
-# fastapi-cli==0.0.4
+fastapi-cli==0.0.4
 httpx==0.27.0
 # huggingface-hub==0.17.3
 # langchain==0.2.5
@@ -15,6 +15,6 @@ sentence-transformers==2.7.0
 # tokenizers==0.14.1
 torch==2.3.0
 transformers==4.34.1
-unsloth[colab-new]>=2024.9  # Unsloth để load GPT-OSS-20B finetuned model
-underthesea==6.8.0
-underthesea_core==1.0.4
+# underthesea==6.8.0
+# underthesea_core==1.0.4
+peft

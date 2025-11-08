@@ -3,11 +3,11 @@
 // Lấy API URL từ environment variable hoặc sử dụng default
 // Trong production: VITE_API_URL=https://legalbizai.hypersona.vn/api
 // Trong development: VITE_API_URL=http://localhost:1142
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:1142';
+// const API_URL = import.meta.env.VITE_API_URL || 'https://legalbizai.hypersona.vn/api';
 
 export const sendMessageChatService = async (promptInput, model) => {
     // Sử dụng API_URL từ environment variable
-    const apiEndpoint = `${API_URL}/stream`;
+    const apiEndpoint = `https://legalbizai.hypersona.vn/api/stream`;
     
     const response = await fetch(apiEndpoint, {
       method: "post",

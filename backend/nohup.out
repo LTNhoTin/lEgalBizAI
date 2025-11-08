@@ -1,0 +1,37 @@
+`torch_dtype` is deprecated! Use `dtype` instead!
+/home/nhotin/work/LegalBizAI_project/backend/main.py:39: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("startup")
+INFO:     Started server process [2764173]
+INFO:     Waiting for application startup.
+INFO:__main__:============================================================
+INFO:__main__:Starting LegalBizAI Chatbot Server
+INFO:__main__:============================================================
+INFO:__main__:✓ Retriever model và FAISS index đã được load thành công
+INFO:__main__:  - Embedding model: ModelWrapper
+INFO:__main__:  - FAISS index shape: 2042 vectors
+INFO:__main__:============================================================
+INFO:__main__:Configuration:
+INFO:__main__:  - LegalBizAI (Ollama GPT-OSS-20B): http://localhost:11434
+INFO:__main__:  - Ollama Model: gpt-oss:20b
+INFO:__main__:  - LegalBizAI Pro (Gemini): gemini-2.0-flash-exp
+INFO:__main__:  - Gemini API Key: ********************...gmlQ
+INFO:__main__:============================================================
+INFO:     Application startup complete.
+ERROR:    [Errno 98] error while attempting to bind on address ('127.0.0.1', 8000): address already in use
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+Phát hiện LoRA adapter tại /home/nhotin/work/LegalBizAI_project/finetune/embedding_models/baai_bge_m3/output/bge_m3/best_model
+Đang load base model và merge với LoRA adapter...
+Đã có merged model tại /home/nhotin/work/LegalBizAI_project/finetune/embedding_models/baai_bge_m3/output/bge_m3/best_model/merged_model, đang load...
+⚠ Đảm bảo chạy trên CPU...
+⚠ Không thể load bằng SentenceTransformer: type object 'AutoModel' has no attribute 'load'
+Đang load trực tiếp bằng AutoModel...
+✓ Đã load model với LoRA adapter thành công (AutoModel wrapper)!
+<retrieval.retrieve.ModelWrapper object at 0x71261e5b5ab0>
+✓ Model đã được đảm bảo chạy trên CPU
+✓ Đã load faiss_index thành công từ /home/nhotin/work/LegalBizAI_project/backend/data/faiss_index

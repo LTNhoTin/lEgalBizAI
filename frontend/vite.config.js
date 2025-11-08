@@ -13,5 +13,10 @@ export default defineConfig({
   server: {
     host: true, // Allow Vite to listen on 0.0.0.0
     port: 5173, // Ensure Vite listens on port 5173
+    allowedHosts: [
+      'legalbizai.hypersona.vn',
+      'localhost',
+      '127.0.0.1'
+    ],
   },
 });
